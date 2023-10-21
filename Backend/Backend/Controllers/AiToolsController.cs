@@ -25,29 +25,27 @@ public class AiToolsController : ControllerBase
 
     [HttpPost]
     [Route("AiTools/chat")]
-    public async Task<IActionResult> PostQuestion([FromBody] QuestionModel questionModel)
+    public async Task<IActionResult> PostQuestion(QuestionModel questionModel, string studySessionId)
     {
         if (string.IsNullOrEmpty(questionModel?.Question)) 
             return BadRequest("Question cannot be empty");
-        string response = await _chatAiService.Execute(questionModel.Question, "622e1e17-e1e1-4a15-8b37-a57073e12052");
+        string response = await _chatAiService.Execute(questionModel.Question, studySessionId);
         return Ok(new { response });
     }
     
     [HttpPost]
     [Route("AiTools/createFlashcards")]
-    public async Task<IActionResult> CreateFlashcards([FromForm] string? studySessionId)
+    public async Task<IActionResult> CreateFlashcards(string? studySessionId)
     {
-        List<string> responses = await _flashcardService.Execute("622e1e17-e1e1-4a15-8b37-a57073e12052");
-        string response = responses[0];
-        return Ok(new { response });
+        List<string> responses = await _flashcardService.Execute(studySessionId);
+        return Ok(responses);
     }
     
     [HttpPost]
     [Route("AiTools/createMultipleChioce")]
-    public async Task<IActionResult> CreateMultipleChoice([FromForm] string? studySessionId)
+    public async Task<IActionResult> CreateMultipleChoice(string? studySessionId)
     {
-        List<string> responses = await _multipleChoiceService.Execute("622e1e17-e1e1-4a15-8b37-a57073e12052");
-        string response = responses[0];
-        return Ok(new { response });
+        List<string> responses = await _multipleChoiceService.Execute(studySessionId);
+        return Ok(responses);
     }
 }

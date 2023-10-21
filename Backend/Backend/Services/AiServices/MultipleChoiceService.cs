@@ -1,5 +1,3 @@
-using Backend.AzureBlobStorage;
-using Backend.Services.DataService;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SemanticFunctions;
@@ -27,16 +25,27 @@ public class MultipleChoiceService
 
     private static ISKFunction RegisterMultiplechoiceFunction(IKernel kernel)
     {
-        const string skPrompt = """
-Please make comprehensive and detailed multiple-choice test questions based on the most important parts of the following information. Each question should have four options, with only one being the correct answer. Format your response in the exact same structure as below; NO OTHER TEXT
-``STRUCTURE
-{"questions":"answer"{"question": "...,""options": ["...","...","...","..."],"answer": "..."},{...}]}
-```
-
+        const string skPrompt = @"
+Please make comprehensive and detailed multiple-choice test questions based on the most important parts of the following information. Each question should have four options, with only one being the correct answer. Format the questions in JSON, where each question includes four nested answers. Send only the JSON response; NO OTHER TEXT
+{
+  ""questions"": ""answer""
+        {
+            ""question"": ""...,""
+                ""options"": [
+                ""..."",
+                ""..."",
+                ""..."",
+                ""...""
+                ],
+                ""answer"": ""...""
+        },
+        {...}
+        ]
+    }
 ```INFORMATION
 {{$INFORMATION}}
 ```
-""";
+";
 
         PromptTemplateConfig promptConfig = new()
         {
