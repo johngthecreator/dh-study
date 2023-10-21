@@ -1,3 +1,4 @@
+using Backend.Services.DataService;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.SemanticKernel.Memory;
 
@@ -12,14 +13,24 @@ public class EmbeddingCacheService
         _memoryCache = memoryCache;
     }
 
-    public bool TryGetEmbeddings(string? userGuid, out ISemanticTextMemory embeddings)
+    public bool TryGetEmbeddings(string studySessionId, out ISemanticTextMemory embeddings)
     {
-        return _memoryCache.TryGetValue(GetCacheKey(userGuid), out embeddings);
+        return _memoryCache.TryGetValue(GetCacheKey(studySessionId), out embeddings);
     }
 
-
-    private string GetCacheKey(string? userGuid)
+    public void SetEmbeddings(string studySessionId, ISemanticTextMemory embeddings)
     {
-        return $"Embeddings-{userGuid}";
+        MemoryCacheEntryOptions cacheEntryOptions = new MemoryCacheEntryOptions
+        {
+            // Set your cache expiration preferences here
+            SlidingExpiration = TimeSpan.FromMinutes(10)
+        };
+
+        _memoryCache.Set(GetCacheKey(studySessionId), embeddings, cacheEntryOptions);
+    }
+
+    private string GetCacheKey(string studySessionId)
+    {
+        return $"Embeddings-{studySessionId}";
     }
 }

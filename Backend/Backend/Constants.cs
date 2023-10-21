@@ -1,6 +1,7 @@
 namespace Backend;
 
-public class Constants
+public static class Constants
 {
-    public static string OpenAi32KContext = "gpt-4-32k";
+    public static readonly string OpenAiChatCompletionModel = "gpt-3.5-turbo-16k";
+    public static readonly string OpenAiEmbeddingModel = "text-embedding-ada-002";
 }
