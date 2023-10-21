@@ -9,25 +9,27 @@ namespace Backend.Services.AiServices;
 public class ChatAiService
 {
     private readonly EmbeddingCacheService _embeddingCacheService;
+    private readonly KernelService _kernelService;
     private static TextEmbeddingService? _textEmbeddingService;
-    private readonly ISKFunction _chatFunction;
+    private ISKFunction _chatFunction;
 
-    private readonly IKernel _kernel;
+    private IKernel _kernel;
     private readonly IUserAuthService _userAuthService;
 
     public ChatAiService(IConfiguration configuration, EmbeddingCacheService embeddingCacheService, 
         KernelService kernelService, TextEmbeddingService? textEmbeddingService, IUserAuthService userAuthService)
     {
         _embeddingCacheService = embeddingCacheService;
+        _kernelService = kernelService;
         _textEmbeddingService = textEmbeddingService;
         _userAuthService = userAuthService;
-        _kernel = kernelService.KernelBuilder;
-        _chatFunction = RegisterChatFunction(_kernel);
     }
 
     public async Task<string> Execute(string userQuestion, string studySessionId)
     {
         string? userId = _userAuthService.GetUserUuid();
+        _kernel = await _kernelService.GetKernel(userId, studySessionId);
+        _chatFunction = RegisterChatFunction(_kernel);
         string memoryCollectionName = $"{userId}/{studySessionId}";
         await RefreshMemory(_kernel, userId, studySessionId, memoryCollectionName);
         string responses = await GetChatResponse(_kernel, _chatFunction, userQuestion, memoryCollectionName);

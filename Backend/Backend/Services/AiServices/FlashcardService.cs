@@ -22,7 +22,7 @@ public class FlashcardService
     private ISKFunction _destupidFunction;
     private ISKFunction _deDupeFunction;
 
-    private readonly IKernel _kernel;
+    private IKernel _kernel;
     private readonly KernelService _kernelService;
     private readonly TextEmbeddingService _textEmbeddingService;
     private readonly IUserAuthService _userAuthService;
@@ -31,11 +31,9 @@ public class FlashcardService
         IUserAuthService userAuthService, TextEmbeddingService textEmbeddingService)
     {
         _configuration = configuration;
+        _kernelService = kernelService;
         _userAuthService = userAuthService;
         _textEmbeddingService = textEmbeddingService;
-        _kernel = kernelService.KernelBuilder;
-        _flashcardFunction = RegisterFlashcardFunction(_kernel);
-        _deDupeFunction = DeDupeFunction(_kernel);
     }
 
     private static ISKFunction RegisterFlashcardFunction(IKernel kernel)
@@ -72,36 +70,7 @@ If nothing seems like it might be useful in a study scenario, just return a blan
     }
 
 
-    private static ISKFunction CreateDestupidFunction(IKernel kernel)
-    {
-        const string skPrompt = @"
-The following json contains term and definition flash cards. DON'T INCLUDE THINGS THAT SEEM TO BE SPECIFIC TO A PARTICULAR ASSIGNMENT OR PROJECT! Remove cards that are too specific to be useful for test study, cards that are common sense, and cards that are too broad. The result should only contain cards that are useful for a human studying for a test. ONLY RETURN JSON.
-
-```FLASHCARDS
-{{$FLASHCARDS}}
-```
-";
-
-        PromptTemplateConfig promptConfig = new()
-        {
-            Completion =
-            {
-                MaxTokens = 5000,
-                Temperature = 0.4,
-                TopP = 0.1
-            }
-        };
-
-
-
-        PromptTemplate promptTemplate = new(skPrompt, promptConfig, kernel);
-        SemanticFunctionConfig functionConfig = new(promptConfig, promptTemplate);
-
-        // Register the semantic function itself, params: (plugin name, function name, function config)
-        return kernel.RegisterSemanticFunction("DestupidFlashCards", "CleanFlashCards", functionConfig);
-    }
-
-        private static ISKFunction DeDupeFunction(IKernel kernel)
+    private static ISKFunction DeDupeFunction(IKernel kernel)
     {
         const string skPrompt = @"
 The following json contains term and definition flash cards. Some flash cards may be similar. Remove the similar ones. With an overview of the scope of the cards, remove ones that are too specific and not useful to the general subject matter. Things that are specific to a particular project or assignment should be removed. REUTRN ONLY JSON
@@ -129,7 +98,11 @@ The following json contains term and definition flash cards. Some flash cards ma
 
     public async Task<string> Execute(string studySessionId)
     {
-        List<string>? paragraphs = await GetFlashcardString(_userAuthService.GetUserUuid(), studySessionId);
+        string userId = _userAuthService.GetUserUuid();
+        _kernel = await _kernelService.GetKernel(userId, studySessionId);
+        _flashcardFunction = RegisterFlashcardFunction(_kernel);
+        _deDupeFunction = DeDupeFunction(_kernel);
+        List<string>? paragraphs = await GetFlashcardString(userId, studySessionId);
         return await GetFlashcards(_kernel, _flashcardFunction, _destupidFunction, paragraphs);
     }
     

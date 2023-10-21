@@ -10,8 +10,9 @@ namespace Backend.Services.AiServices;
 public class MultipleChoiceService
 {
     private readonly IConfiguration _configuration;
-    private readonly IKernel _kernel;
-    private readonly List<ISKFunction> _multipleChoiceFunctions;
+    private readonly KernelService _kernelService;
+    private IKernel _kernel;
+    private List<ISKFunction> _multipleChoiceFunctions;
     private readonly TextEmbeddingService _textEmbeddingService;
     private readonly IUserAuthService _userAuthService;
 
@@ -19,10 +20,9 @@ public class MultipleChoiceService
         KernelService kernelService, TextEmbeddingService textEmbeddingService, IUserAuthService userAuthService)
     {
         _configuration = configuration;
+        _kernelService = kernelService;
         _textEmbeddingService = textEmbeddingService;
         _userAuthService = userAuthService;
-        _kernel = kernelService.KernelBuilder;
-        _multipleChoiceFunctions = RegisterMultiplechoiceFunctions(_kernel);
     }
 
     private static List<ISKFunction> RegisterMultiplechoiceFunctions(IKernel kernel)
@@ -104,8 +104,11 @@ are only unique questions and options left. Send only the cleaned version of the
 
     public async Task<string> Execute(string studySessionId)
     {
+        string? userId = _userAuthService.GetUserUuid();
+        _kernel = await _kernelService.GetKernel(userId, studySessionId);
+        _multipleChoiceFunctions = RegisterMultiplechoiceFunctions(_kernel);
         IEnumerable<Chunk> chunks =
-            await _textEmbeddingService.GetChunks(_userAuthService.GetUserUuid(), studySessionId);
+            await _textEmbeddingService.GetChunks(userId, studySessionId);
         IEnumerable<Chunk> enumerable = chunks.ToList();
         ConcurrentBag<string> response = new();
 
