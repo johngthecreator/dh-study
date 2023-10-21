@@ -1,0 +1,29 @@
+# Binaries and build outputs
+bin/
+obj/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+.vs/
+
+# .NET Core specific ignore
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Rider, Visual Studio for Mac
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# Temporary files
+*.tmp
+*.swp
+
+# OS generated files
+.DS_Store
+Thumbs.db
