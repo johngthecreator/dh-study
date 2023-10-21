@@ -1,33 +1,26 @@
 using Backend.AzureBlobStorage;
-using Microsoft.SemanticKernel.SkillDefinition;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SemanticFunctions;
+using Microsoft.SemanticKernel.SkillDefinition;
 
-namespace Backend.Services;
+namespace Backend.Services.AiServices;
 
-public class ChatService
+public abstract class ChatService : BaseAiService
 {
-
-    public ChatService(IConfiguration configuration, UploadAzure uploadAzure, EmbeddingCacheService embeddingCacheService, 
-        UserAuthService userAuthService, KernelService kernelService)
+    protected ChatService(IConfiguration configuration, UploadAzure uploadAzure, EmbeddingCacheService embeddingCacheService, 
+        UserAuthService userAuthService, KernelService kernelService) : base(configuration, uploadAzure,
+        embeddingCacheService, userAuthService, kernelService)
     {
-        _configuration = configuration;
-        _uploadAzure = uploadAzure;
-        _embeddingCacheService = embeddingCacheService;
-        _userAuthService = userAuthService;
-        _kernelService = kernelService;
-        _getApiKey = _configuration.GetConnectionString("OpenAiApiKey");
-        
         _kernel = kernelService.KernelBuilder;
         _chatFunction = RegisterChatFunction(_kernel);
     }
 
-    public async Task<string> Chat(string fileName, string userQuestion)
+    public override async Task<List<string>> Execute(string fileName, string userQuestion)
     {
         await RefreshMemory(_kernel, fileName);
-        return await GetChatResponse(_kernel, _chatFunction, userQuestion, fileName);
+        return new List<string>() { await GetChatResponse(_kernel, _chatFunction, userQuestion, fileName) };
     }
     
     private static ISKFunction RegisterChatFunction(IKernel kernel)
@@ -64,7 +57,7 @@ public class ChatService
         // Register the semantic function itself, params: (plugin name, function name, function config)
         return kernel.RegisterSemanticFunction("AskPdfQuestion", "AskAway", functionConfig);
     }
-    
+
     private static async Task<string> GetChatResponse(IKernel kernel, ISKFunction chatFunction, string userQuestion, string fileName)
     {
         SKContext kernelContext = kernel.CreateNewContext();
@@ -83,41 +76,6 @@ public class ChatService
         return (await chatFunction.InvokeAsync(kernelContext)).Result;
     }
     
-    private async Task RefreshMemory(IKernel kernel, string fileName)
-    {
-        string? userUuid = _userAuthService.GetUserUuid();
-
-        if (_embeddingCacheService.TryGetEmbeddings(userUuid, out ISemanticTextMemory cachedEmbeddings))
-        {
-            // Use cachedEmbeddings if available
-            kernel.RegisterMemory(cachedEmbeddings);
-            return;
-        }
-
-        IAsyncEnumerable<List<string>> paragraphs = _uploadAzure.DownloadParagraphEmbeddings("testingContainer");
-        await foreach (List<string> paragraphList in paragraphs)
-        {
-            foreach (var paragraph in paragraphList)
-            {
-                await kernel.Memory.SaveInformationAsync(fileName, paragraph, paragraph.GetHashCode().ToString());
-            }
-        }
-
-        _embeddingCacheService.SetEmbeddings(userUuid, kernel.Memory);
-    }
-
-
-
-
-
-    private static readonly string _apiKey = "";
-    private const string _gptModel = "";
-    private readonly IConfiguration _configuration;
-    private readonly UploadAzure _uploadAzure;
-    private readonly EmbeddingCacheService _embeddingCacheService;
-    private readonly UserAuthService _userAuthService;
-    private readonly KernelService _kernelService;
-    private string _getApiKey = _apiKey;
     private readonly IKernel _kernel;
     private readonly ISKFunction _chatFunction;
 }

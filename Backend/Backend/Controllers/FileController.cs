@@ -19,30 +19,10 @@ public class FileController : ControllerBase
     }
 
     [HttpPost("upload")]
-    public async Task<IActionResult> Upload(IFormFile? file)
-    {
-        if (file == null || file.Length == 0)
-            return BadRequest("No file uploaded.");
-
-        string tempFilePath = Guid.NewGuid() + Path.GetExtension(file.FileName); 
-        await using (Stream stream = new FileStream(tempFilePath, FileMode.Create))
-        {
-            EmbeddingService embeddingService = new EmbeddingService(stream, file.FileName);
-            string json = JsonSerializer.Serialize(embeddingService.Paragraphs);
-            using MemoryStream jsonStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
-            _uploadAzure.UploadStream(jsonStream);
-        }
-        await _uploadAzure.UploadToCloud("sebDunn", "compsci", tempFilePath, file.FileName);
-        System.IO.File.Delete(tempFilePath);
-        
-        return Ok("uploaded");
-    }
-
-    [HttpPost("upload2")]
-    public async Task<IActionResult> Upload2(IFormFile file, string sessionId, string userId)
+    public async Task<IActionResult> Upload(IFormFile file, string sessionId, string userId)
     {
         using var stream = file.OpenReadStream();
-
+        
         await _dataService.UploadFile(file.FileName, sessionId, userId, stream);
 
         return Ok();

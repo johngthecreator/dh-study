@@ -2,11 +2,16 @@ import React, { useState } from 'react';
 import Header from './Header';
 import FileDisplay from './FileDisplay';
 import UploadModal from './UploadModal';
+import axios from 'axios';
+import { useAtom } from 'jotai';
+import { uuidAtom } from '../atoms/uuidAtom';
 
 export default function Upload() {
     const [fileNames, setFileNames] = useState([]);
     const [files, setFiles] = useState([]);
     const [errorMessage, setErrorMessage] = useState('');
+    const [sessionName, setSessionName] = useState('');
+    const [uuid, ] = useAtom(uuidAtom);
 
     const removeFile = (i) => {
         const newItems = fileNames.filter((file, idx) => idx !== i);
@@ -44,8 +49,18 @@ export default function Upload() {
 
     const handleSubmit = (event) => {
         event.preventDefault();
+        const formData = new FormData();
+        formData.append('sessionName', sessionName);
+        formData.append('files', files)
         if (validateFiles()) {
-            console.log('Files are valid:', files);
+            axios.post("https://purelearnmono.azurewebsites.net/StudySession/makesession", formData, {
+                headers:{
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${uuid}`
+
+                }})
+                .then(resp=>console.log(resp.data))
+                .catch(e=>console.error(e));
             // Handle the valid files here (e.g., upload them to a server)
         }
     };
@@ -55,7 +70,7 @@ export default function Upload() {
         <div className='p-5'>
             <div  className='flex justify-center'>
             <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
-                <input type='text' className='border-solid border-2 border-black p-2 rounded-lg' placeholder='Session Name'/>
+                <input type='text' onChange={e=>setSessionName(e.target.value)} className='border-solid border-2 border-black p-2 rounded-lg' placeholder='Session Name'/>
                 <div className='flex justify-center'>
                     <input  
                         type="file"
@@ -82,7 +97,7 @@ export default function Upload() {
                 )
                 }
                 <div className='flex gap-10 justify-center mt-5'>
-                    <button className='bg-[#F0F4F9] px-10 py-2 rounded text-[#22222] border-solid border-2 border-[#3E69A3] shrink-0 grow-0 rounded-xl'>Let's Study!</button>
+                    <button onClick={handleSubmit} className='bg-[#F0F4F9] px-10 py-2 rounded text-[#22222] border-solid border-2 border-[#3E69A3] shrink-0 grow-0 rounded-xl'>Let's Study!</button>
                 </div>
             </form>
         </div>

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Backend.Services;
+using Backend.Services.AiServices;
 
 namespace Backend.Controllers;
 
@@ -23,8 +24,9 @@ public class ChatController : ControllerBase
     public async Task<IActionResult> PostQuestion([FromBody] QuestionModel questionModel)
     {
         if (string.IsNullOrEmpty(questionModel?.Question)) return BadRequest("Question cannot be empty");
-        string fileName = "";
-        string response = await _chatService.Chat(fileName, questionModel.Question);
+        const string fileName = "";
+        List<string> responses = await _chatService.Execute(fileName, questionModel.Question);
+        string response = responses[0];
         return Ok(new { response });
     }
 }

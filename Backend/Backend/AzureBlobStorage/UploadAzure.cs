@@ -22,7 +22,7 @@ public class UploadAzure
 
     public void UploadStream(Stream stream)
     {
-        var blob = _blobUserContainer.GetBlobClient("testingContainer");
+        BlobClient? blob = _blobUserContainer.GetBlobClient("testingContainer.json");
         blob.UploadAsync(stream, true);
     }
 

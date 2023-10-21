@@ -10,13 +10,12 @@ public class KernelService
     public KernelService(IConfiguration configuration)
     {
         string apiKey = configuration.GetConnectionString("OpenAiApiKey");
-        string gptModel = configuration.GetConnectionString("OpenAiGptModel");
         
         if (KernelBuilder == null)
         {
             KernelBuilder = new KernelBuilder()
-                .WithOpenAIChatCompletionService(gptModel, apiKey)
-                .WithOpenAITextEmbeddingGenerationService("text-embedding-ada-002", apiKey)
+                .WithOpenAIChatCompletionService(Constants.OpenAi32KContext, apiKey)
+                .WithOpenAITextEmbeddingGenerationService(Constants.OpenAi32KContext, apiKey)
                 .WithMemoryStorage(new VolatileMemoryStore())
                 .Build();
         }
