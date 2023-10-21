@@ -14,23 +14,25 @@ public class AiToolsController : ControllerBase
 {
     private readonly ChatAiService _chatAiService;
     private readonly MaterialCacheService _materialCacheService;
-
+    private readonly ChatHistoryService _chatHistoryService;
 
     public AiToolsController(ChatAiService chatAiService,
-        MaterialCacheService materialCacheService)
+        MaterialCacheService materialCacheService,
+        ChatHistoryService chatHistoryService)
     {
         _chatAiService = chatAiService;
         _materialCacheService = materialCacheService;
+        _chatHistoryService = chatHistoryService;
     }
 
     [HttpPost]
     [Route("AiTools/chat")]
-    public async Task<IActionResult> PostQuestion(QuestionModel questionModel, string studySessionId)
+    public async Task<ActionResult<IEnumerable<ChatEntry>>> PostQuestion(QuestionModel questionModel, string studySessionId)
     {
         if (string.IsNullOrEmpty(questionModel?.Question))
             return BadRequest("Question cannot be empty");
         string response = await _chatAiService.Execute(questionModel.Question, studySessionId);
-        return Ok(new { response });
+        return Ok(_chatHistoryService.GetMessages(studySessionId));
     }
 
     [HttpPost]
