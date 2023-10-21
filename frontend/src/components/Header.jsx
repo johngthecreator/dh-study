@@ -12,13 +12,13 @@ export default function Header(){
         // <header className="flex flex-row bg-[#3E69A3] p-5 items-center">
         <header className="flex flex-row bg-blue-600 p-5 items-center">
             <div className='flex flex-row gap-5 items-center'>
-            <IconButton
+            {/* <IconButton
             colorScheme="dark"
             aria-label='menu button'
             icon={<HamburgerIcon boxSize={8}/>}
             ref={btnRef}
             onClick={onOpen}
-            />
+            /> */}
             </div>
             <Drawer
             isOpen={isOpen}

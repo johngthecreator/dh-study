@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react';
 import { data } from './question';
+import { sessionIdAtom } from '../atoms/sessionIdAtom';
+import { useAtom } from 'jotai';
+import { quizAtom } from '../atoms/quizAtom';
+import { LineWobble } from "@uiball/loaders"
+import axios from 'axios';
 
 function MultipleChoice(props){
     const [userAnswer, setUserAnswer] = useState(null);
@@ -37,14 +42,33 @@ function MultipleChoice(props){
 }
 
 export default function Quiz(){
+    const [sessionId, ] = useAtom(sessionIdAtom);
+    const [quiz, setQuiz] = useAtom(quizAtom);
+    useEffect(()=>{
+        if(sessionId && !quiz){
+            axios.post(`https://purelearnmono.azurewebsites.net/AiTools/createMultipleChioce?studySessionId=${sessionId}`)
+            .then(resp=>{
+                setQuiz(resp.data);
+            })
+            .catch(e=>console.error(e))
+        }
 
+    },[sessionId])
+    if(quiz){
+        return(
+            <div>
+                {quiz.questions.map((resp,i)=>{
+                    return(
+                        <MultipleChoice index={i} question={resp.question} choices={resp.options} answer={resp.answer}/>
+                    )
+                })}
+            </div>
+        )
+    }
     return(
-        <div>
-            {data.map((resp,i)=>{
-                return(
-                    <MultipleChoice index={i} question={resp.question} choices={resp.options} answer={resp.answer}/>
-                )
-            })}
+        <div className="flex flex-col h-screen justify-center items-center gap-5">
+            <LineWobble size={175} color="#446DF6" />
         </div>
     )
+
 }

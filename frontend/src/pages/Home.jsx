@@ -2,15 +2,14 @@ import { useEffect, useState } from "react";
 import Folder from "../components/Folder";
 import Header from "../components/Header";
 import Upload from "../components/Upload";
-import UploadModal from "../components/UploadModal";
 import axios from "axios";
 import { uuidAtom } from "../atoms/uuidAtom";
 import { useAtom } from "jotai";
 
 export default function Home(){
     const [recentSessions, setRecentSessions] = useState([]);
-    const [uuid, ] = useAtom(uuidAtom);
-    // const uuid = "matthew_dev"
+    // const [uuid, ] = useAtom(uuidAtom);
+    const uuid = "_dev3"
     useEffect(()=>{
         axios.post("https://purelearnmono.azurewebsites.net/StudySession/getsessions",{},{})
         .then(resp=>{
@@ -23,7 +22,7 @@ export default function Home(){
             setRecentSessions(uuidSessions);
         })
         .catch(e=>console.error(e));
-    })
+    }, [])
     return(
         <div className="h-screen w-full">
             <Header/>
@@ -45,7 +44,7 @@ export default function Home(){
                             {recentSessions.map((session, index)=>{
                                 if(session.userId == uuid){
                                     return(
-                                        <Folder key={`${session.name}${index}`} name={session.name} />
+                                        <Folder key={`${session.name}${index}`} sessionId={session.id} name={session.name} />
                                     )
                                 }
                             })}
