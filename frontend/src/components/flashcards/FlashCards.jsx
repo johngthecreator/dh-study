@@ -6,6 +6,7 @@ import { flashcardsAtom } from "../../atoms/flashcardsAtom"
 import { useAtom } from "jotai"
 import { LineWobble } from "@uiball/loaders"
 import axios from "axios"
+import { uuidAtom } from "../../atoms/uuidAtom"
 
 function FlashCard(props){
     return(
@@ -24,10 +25,15 @@ function FlashCard(props){
 
 export default function FlashCards(){
     const [sessionId, ] = useAtom(sessionIdAtom);
-    const [flashcards, setFlashcards] = useAtom(flashcardsAtom);
+    const [flashcards, setFlashcards] = useAtom(flashcardsAtom); 
+    const [uuid, ] = useAtom(uuidAtom);
     useEffect(()=>{
         if(sessionId && !flashcards){
-            axios.post(`https://purelearnmono.azurewebsites.net/AiTools/createFlashcards?studySessionId=${sessionId}`)
+            axios.post(`https://purelearnmono.azurewebsites.net/AiTools/createFlashcards?studySessionId=${sessionId}`,{},{
+                headers:{
+                    'Authorization': `Bearer ${uuid}`
+                }
+            })
             .then(resp=>{
                 setFlashcards(resp.data);
             })

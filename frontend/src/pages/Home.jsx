@@ -14,10 +14,17 @@ export default function Home(){
 
     useEffect(()=>{
         if(!uuid){
-            navigate("/login")
+            navigate("/login");
+        }else{
+            navigate("/");
         }
+
         if(uuid){
-            axios.post("https://purelearnmono.azurewebsites.net/StudySession/getsessions",{},{})
+            axios.post("https://purelearnmono.azurewebsites.net/StudySession/getsessions",{},{
+                headers:{
+                    'Authorization': `Bearer ${uuid}`
+                }
+            })
             .then(resp=>{
                 let uuidSessions = []
                 for(let i in resp.data){
