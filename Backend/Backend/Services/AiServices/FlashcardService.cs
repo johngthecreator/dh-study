@@ -2,6 +2,9 @@ using System.Collections.Concurrent;
 
 using Backend.AzureBlobStorage;
 using Backend.Services.DataService;
+using System.Text.RegularExpressions;
+
+
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SemanticFunctions;
@@ -21,8 +24,9 @@ public class FlashcardService
 
     private readonly IKernel _kernel;
     private readonly KernelService _kernelService;
-    private readonly IUserAuthService _userAuthService;
     private readonly TextEmbeddingService _textEmbeddingService;
+    private readonly IUserAuthService _userAuthService;
+    private readonly ISKFunction _flashcardFunction;
 
     public FlashcardService(IConfiguration configuration, KernelService kernelService,
         IUserAuthService userAuthService, TextEmbeddingService textEmbeddingService)
@@ -66,7 +70,6 @@ If nothing seems like it might be useful in a study scenario, just return a blan
         PromptTemplate promptTemplate = new(skPrompt, promptConfig, kernel);
         SemanticFunctionConfig functionConfig = new(promptConfig, promptTemplate);
 
-        // Register the semantic function itself, params: (plugin name, function name, function config)
         return kernel.RegisterSemanticFunction("CreateFlashcards", "ImportantInfoFlashcards", functionConfig);
     }
 
@@ -89,14 +92,7 @@ The following json contains term and definition flash cards. DON'T INCLUDE THING
                 Temperature = 0.4,
                 TopP = 0.1
             }
-        };
-
-        PromptTemplate promptTemplate = new(skPrompt, promptConfig, kernel);
-        SemanticFunctionConfig functionConfig = new(promptConfig, promptTemplate);
-
-        // Register the semantic function itself, params: (plugin name, function name, function config)
-        return kernel.RegisterSemanticFunction("DestupidFlashCards", "CleanFlashCards", functionConfig);
-    }
+        }
 
     private static ISKFunction DeDupeFunction(IKernel kernel)
     {
@@ -165,14 +161,14 @@ The following json contains term and definition flash cards. Some flash cards ma
 
         return chunks.Select(c => c.Text).ToList();;
     }
-
+    
     private async Task<string> GetFlashcards(IKernel kernel, ISKFunction flashcardsFunction, ISKFunction deStupidFunction, List<string> paragraphs)
     {
         ConcurrentBag<string> response = new();
 
         var tasks = paragraphs.Select(async paragraph =>
-        {
-            SKContext kernelContext = kernel.CreateNewContext();
+    {
+        SKContext kernelContext = kernel.CreateNewContext();
 
             kernelContext.Variables["INFORMATION"] = paragraph;  // Changed to use `paragraph` instead of `paragraphs.FirstOrDefault()`
             var cards = (await flashcardsFunction.InvokeAsync(kernelContext)).Result;

@@ -1,10 +1,9 @@
-﻿using FirebaseAdmin.Auth;
-
+﻿using System.Security.Claims;
+using System.Text.Encodings.Web;
+using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
-
-using System.Security.Claims;
-using System.Text.Encodings.Web;
+using Microsoft.Extensions.Primitives;
 
 namespace Backend.Auth;
 
@@ -22,31 +21,29 @@ public class FirebaseAuthenticationHandler : AuthenticationHandler<Authenticatio
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         // Get the Authorization header
-        if (!Request.Headers.TryGetValue("Authorization", out var authorization))
-        {
+        if (!Request.Headers.TryGetValue("Authorization", out StringValues authorization))
             return AuthenticateResult.Fail("Cannot read authorization header.");
-        }
 
-        var idToken = authorization.ToString().Split(' ').Last();
+        string idToken = authorization.ToString().Split(' ').Last();
 
         try
         {
             // Validate the ID token
-            var decodedToken = await FirebaseAuth.DefaultInstance
+            FirebaseToken? decodedToken = await FirebaseAuth.DefaultInstance
                 .VerifyIdTokenAsync(idToken);
 
             // Create claims
-            var claims = new List<Claim>
+            List<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, decodedToken.Uid)
+                new(ClaimTypes.NameIdentifier, decodedToken.Uid)
                 // Add other claims as needed
             };
 
             // Create claims identity
-            var claimsIdentity = new ClaimsIdentity(claims, Scheme.Name);
+            ClaimsIdentity claimsIdentity = new(claims, Scheme.Name);
 
             // Create authentication ticket
-            var authenticationTicket = new AuthenticationTicket(
+            AuthenticationTicket authenticationTicket = new(
                 new ClaimsPrincipal(claimsIdentity),
                 new AuthenticationProperties(),
                 Scheme.Name);

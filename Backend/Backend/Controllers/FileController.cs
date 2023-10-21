@@ -1,8 +1,4 @@
-using System.Text;
-using System.Text.Json;
-using Backend.AzureBlobStorage;
 using Backend.Services.DataService;
-
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
@@ -19,8 +15,8 @@ public class FileController : ControllerBase
     [HttpPost("upload")]
     public async Task<IActionResult> Upload(IFormFile file, string sessionId, string userId)
     {
-        using var stream = file.OpenReadStream();
-        
+        using Stream stream = file.OpenReadStream();
+
         await _dataService.UploadFile(file.FileName, sessionId, userId, stream);
 
         return Ok();
