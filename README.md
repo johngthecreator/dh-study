@@ -1,6 +1,6 @@
 <p align="center">
 <a href=https://github.com/johngthecreator/dh-study target="_blank">
-<img src='/frontend/public/octo_logo_clear.png' width="100%" alt="Banner" />
+<img src='/frontend/public/octo_logo_clear.png' width="60%" alt="Banner" />
 </a>
 </p>
 
@@ -51,9 +51,24 @@ Include a concise explanation about the Tech Stack employed.
 
 #### Your Environment Variable
 
-- Step 1
+- Create a `sensitivesettings.json` in the /Backend/Backend/ directory and add the following keys:
+  - OpenAiApiKey
+  - AzureBlobAccessKey1
+  - AzureBlobConnectionString1
+  - StorageAccountName
+  - BlobServiceEndpoint
 
-- Step 2
+- Install the following nuget packages:
+  - Azure.Storage.Blobs
+  - DocX
+  - itext7
+  - Microsoft.SemanticKernel
+  - Microsoft.Azure.Cosmos
+  - Swashbuckle.AspNetCore
+  - FirebaseAdmin
+  - Microsoft.AspNetCore.Authentication
+
+- Have fun running!
 
 ## 🚀 Run Locally
 1.Clone the dh-study repository:
