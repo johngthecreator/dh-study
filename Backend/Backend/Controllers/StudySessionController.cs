@@ -1,5 +1,7 @@
 ﻿using Backend.Services;
 using Backend.Services.DataService;
+
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
@@ -20,6 +22,7 @@ public class StudySessionController : Controller
     }
 
     [HttpPost("makesession")]
+    [Authorize]
     public async Task<IActionResult> CreateSession([FromForm] List<IFormFile> files, [FromForm] string sessionName)
     {
         string studySessionId = await _dataService.CreateStudySession(sessionName, _userAuthService.GetUserUuid());
@@ -35,12 +38,14 @@ public class StudySessionController : Controller
     }
 
     [HttpPost("getsessions")]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<StudySession>>> GetSessions()
     {
         return Ok(await _dataService.GetStudySessions(_userAuthService.GetUserUuid()));
     }
 
     [HttpPost("addfile")]
+    [Authorize]
     public async Task<IActionResult> AddFile([FromForm] IFormFile formFile, string sessionId)
     {
         using Stream stream = formFile.OpenReadStream();
@@ -51,6 +56,7 @@ public class StudySessionController : Controller
     }
 
     [HttpPost("getfiles")]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<UserDocument>>> GetFiles(string sessionId)
     {
         IEnumerable<UserDocument> files =

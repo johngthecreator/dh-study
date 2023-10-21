@@ -1,5 +1,7 @@
 using Backend.Services;
 using Backend.Services.AiServices;
+
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
@@ -27,6 +29,7 @@ public class AiToolsController : ControllerBase
 
     [HttpPost]
     [Route("AiTools/chat")]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<ChatEntry>>> PostQuestion(QuestionModel questionModel, string studySessionId)
     {
         if (string.IsNullOrEmpty(questionModel?.Question))
@@ -37,6 +40,7 @@ public class AiToolsController : ControllerBase
 
     [HttpPost]
     [Route("AiTools/createFlashcards")]
+    [Authorize]
     public async Task<IActionResult> CreateFlashcards(string? studySessionId)
     {
         return Ok(await _materialCacheService.GetFlashCards(studySessionId));
@@ -44,6 +48,7 @@ public class AiToolsController : ControllerBase
 
     [HttpPost]
     [Route("AiTools/createMultipleChioce")]
+    [Authorize]
     public async Task<IActionResult> CreateMultipleChoice(string? studySessionId)
     {
         return Ok(await _materialCacheService.GetQuiz(studySessionId));
