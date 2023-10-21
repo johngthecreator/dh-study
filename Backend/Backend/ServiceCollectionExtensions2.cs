@@ -1,4 +1,5 @@
 ﻿using Backend.Services;
+using Backend.Services.AiServices;
 using Backend.Services.DataService;
 
 namespace Backend;
@@ -9,6 +10,7 @@ public static class ServiceCollectionExtensions2
     {
         return
             services
+                .AddSingleton<ChatHistoryService>()
                 .AddSingleton<IDataService, DataService>()
                 .AddSingleton<TextEmbeddingService>()
                 .AddSingleton<MaterialCacheService>()

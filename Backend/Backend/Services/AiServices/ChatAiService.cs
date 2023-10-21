@@ -9,6 +9,7 @@ namespace Backend.Services.AiServices;
 public class ChatAiService
 {
     private readonly EmbeddingCacheService _embeddingCacheService;
+    private readonly ChatHistoryService _chatHistoryService;
     private readonly KernelService _kernelService;
     private static TextEmbeddingService? _textEmbeddingService;
     private ISKFunction _chatFunction;
@@ -17,9 +18,11 @@ public class ChatAiService
     private readonly IUserAuthService _userAuthService;
 
     public ChatAiService(IConfiguration configuration, EmbeddingCacheService embeddingCacheService, 
+        ChatHistoryService chatHistoryService,
         KernelService kernelService, TextEmbeddingService? textEmbeddingService, IUserAuthService userAuthService)
     {
         _embeddingCacheService = embeddingCacheService;
+        _chatHistoryService = chatHistoryService;
         _kernelService = kernelService;
         _textEmbeddingService = textEmbeddingService;
         _userAuthService = userAuthService;
@@ -32,7 +35,7 @@ public class ChatAiService
         _chatFunction = RegisterChatFunction(_kernel);
         string memoryCollectionName = $"{userId}/{studySessionId}";
         await RefreshMemory(_kernel, userId, studySessionId, memoryCollectionName);
-        string responses = await GetChatResponse(_kernel, _chatFunction, userQuestion, memoryCollectionName);
+        string responses = await GetChatResponse(_kernel, _chatFunction, userQuestion, memoryCollectionName, studySessionId);
 
         return responses;
     }
@@ -55,20 +58,14 @@ public class ChatAiService
     private static ISKFunction RegisterChatFunction(IKernel kernel)
     {
         const string skPrompt = @"
-        Here is your chat history, ONLY USE IF A USER ASKS YOU A QUESTION DIRECTLY ABOUT YOUR CHAT WITH THEM. IT IS SORTED
-        CHRONOLOGICALLY WITH MOST RECENT ON TOP.
-        ```History
-         {{$HISTORY}}
-        ```
-        
-        Use the following context to answer the question ```{{$QUESTION}}```. Answer as concise and brief as possible, 
-        and remain impartial to any bias use the context rather than making up knowledge. If the context does not include 
-        information that seems at least somewhat relevant, reply with 'I am sorry but there is not enough information about this in your 
-        document'.
+Here is the chat history:
+```
+    {{$HISTORY}}
+```
 
-        ``` CONTEXT
-        {{$CONTEXT}}
-        ```";
+The user asked this question ```{{$QUESTION}}``` and the following context was provided (if valid context was found) ```{{$CONTEXT}}```
+        
+Use this informatino to respond to the user as best as possible. If you are not very sure about something, say that you do not know. You respond:";
 
         PromptTemplateConfig promptConfig = new()
         {
@@ -87,8 +84,8 @@ public class ChatAiService
         return kernel.RegisterSemanticFunction("AskPdfQuestion", "AskAway", functionConfig);
     }
 
-    private static async Task<string> GetChatResponse(IKernel kernel, ISKFunction chatFunction, string userQuestion,
-        string memoryCollectionName)
+    private async Task<string> GetChatResponse(IKernel kernel, ISKFunction chatFunction, string userQuestion,
+        string memoryCollectionName, string sessionId)
     {
         SKContext kernelContext = kernel.CreateNewContext();
 
@@ -102,10 +99,17 @@ public class ChatAiService
             fileContext = fileContext + Environment.NewLine + memory.Metadata.Text;
 
         string history = string.Empty;
-        kernelContext.Variables["history"] = history;
+
+        _chatHistoryService.AddUserMessage(sessionId, userQuestion);
+
+        kernelContext.Variables["HISTORY"] = _chatHistoryService.GetChatHistory(sessionId);
         kernelContext.Variables["CONTEXT"] = fileContext ?? "[no context found]";
         kernelContext.Variables["QUESTION"] = userQuestion;
 
-        return (await chatFunction.InvokeAsync(kernelContext)).Result;
+        var result = (await chatFunction.InvokeAsync(kernelContext)).Result;
+
+        _chatHistoryService.AddAgentMessage(sessionId, result);
+
+        return result;
     }
 }
