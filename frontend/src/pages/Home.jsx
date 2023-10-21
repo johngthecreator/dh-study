@@ -1,3 +1,4 @@
+import Folder from "../components/Folder";
 import Header from "../components/Header";
 
 export default function Home(){
@@ -12,7 +13,21 @@ export default function Home(){
                 </div>
             </div>
             <div className="p-5">
-                <h2>Recent Sessions</h2>
+                <h2 className="text-xl font-bold text-[#222]">Recent Sessions</h2>
+                <div className="flex flex-row overflow-x-scroll py-5 gap-5">
+                    <Folder />
+                    <Folder />
+                    <Folder />
+                    <Folder />
+                    <Folder />
+                    <Folder />
+                    <Folder />
+                    <Folder />
+                    <Folder />
+                    <Folder />
+                    <Folder />
+                    <Folder />
+                </div>
 
             </div>
             
