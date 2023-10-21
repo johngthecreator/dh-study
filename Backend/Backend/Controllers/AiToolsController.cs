@@ -37,8 +37,8 @@ public class AiToolsController : ControllerBase
     [Route("AiTools/createFlashcards")]
     public async Task<IActionResult> CreateFlashcards(string? studySessionId)
     {
-        List<string> responses = await _flashcardService.Execute(studySessionId);
-        return Ok(responses);
+        var response = await _flashcardService.Execute(studySessionId);
+        return Ok(response);
     }
     
     [HttpPost]

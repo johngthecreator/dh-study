@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 using Backend.AzureBlobStorage;
 using Backend.Services.DataService;
 using Microsoft.SemanticKernel;
@@ -14,6 +16,8 @@ public class FlashcardService
     private readonly IConfiguration _configuration;
     private readonly EmbeddingCacheService _embeddingCacheService;
     private ISKFunction _flashcardFunction;
+    private ISKFunction _destupidFunction;
+    private ISKFunction _deDupeFunction;
 
     private readonly IKernel _kernel;
     private readonly KernelService _kernelService;
@@ -28,13 +32,16 @@ public class FlashcardService
         _textEmbeddingService = textEmbeddingService;
         _kernel = kernelService.KernelBuilder;
         _flashcardFunction = RegisterFlashcardFunction(_kernel);
+        _destupidFunction =  CreateDestupidFunction(_kernel);
+        _deDupeFunction = DeDupeFunction(_kernel);
     }
 
     private static ISKFunction RegisterFlashcardFunction(IKernel kernel)
     {
         const string skPrompt = @"
-Please make 30 comprehensive and detailed flashcards based on the most important terms to be found in the following information. Each question should have four options, with only one being the correct answer. 
-Format the flashcards in JSON, where each term is the key and the definition is the value. Make sure the return format is perfect JSON so I can parse the response directly into c# string -> json parsing; NO OTHER TEXT
+Come up with study flashcards for important terms to be found in the following information. Redundant or filler information should not be included (things like name, date, assignment info, ect.). 
+Return a json object, where each term is the key and the definition is the value. Make sure the return format is perfect JSON; NO OTHER TEXT
+If nothing seems like it might be useful in a study scenario, just return a blank object.
 {
   ""term"": ""definition"",
   ""term"": ""definition"",
@@ -52,7 +59,7 @@ Format the flashcards in JSON, where each term is the key and the definition is 
             {
                 MaxTokens = 5000,
                 Temperature = 0.4,
-                TopP = 0.65
+                TopP = 0.1
             }
         };
 
@@ -64,26 +71,63 @@ Format the flashcards in JSON, where each term is the key and the definition is 
     }
 
 
-    public async Task<List<string>> Execute(string studySessionId)
+    private static ISKFunction CreateDestupidFunction(IKernel kernel)
+    {
+        const string skPrompt = @"
+The following json contains term and definition flash cards. DON'T INCLUDE THINGS THAT SEEM TO BE SPECIFIC TO A PARTICULAR ASSIGNMENT OR PROJECT! Remove cards that are too specific to be useful for test study, cards that are common sense, and cards that are too broad. The result should only contain cards that are useful for a human studying for a test. ONLY RETURN JSON.
+
+```FLASHCARDS
+{{$FLASHCARDS}}
+```
+";
+
+        PromptTemplateConfig promptConfig = new()
+        {
+            Completion =
+            {
+                MaxTokens = 5000,
+                Temperature = 0.4,
+                TopP = 0.1
+            }
+        };
+
+        PromptTemplate promptTemplate = new(skPrompt, promptConfig, kernel);
+        SemanticFunctionConfig functionConfig = new(promptConfig, promptTemplate);
+
+        // Register the semantic function itself, params: (plugin name, function name, function config)
+        return kernel.RegisterSemanticFunction("DestupidFlashCards", "CleanFlashCards", functionConfig);
+    }
+
+    private static ISKFunction DeDupeFunction(IKernel kernel)
+    {
+        const string skPrompt = @"
+The following json contains term and definition flash cards. Some flash cards may be similar. Remove the similar ones. With an overview of the scope of the cards, remove ones that are too specific and not useful to the general subject matter. Things that are specific to a particular project or assignment should be removed. REUTRN ONLY JSON
+```
+{{$JOINED}}
+```
+";
+
+        PromptTemplateConfig promptConfig = new()
+        {
+            Completion =
+            {
+                MaxTokens = 5000,
+                Temperature = 0.2,
+                TopP = 0.1
+            }
+        };
+
+        PromptTemplate promptTemplate = new(skPrompt, promptConfig, kernel);
+        SemanticFunctionConfig functionConfig = new(promptConfig, promptTemplate);
+
+        // Register the semantic function itself, params: (plugin name, function name, function config)
+        return kernel.RegisterSemanticFunction("DestupidFlashCards", "CleanFlashCards", functionConfig);
+    }
+
+    public async Task<string> Execute(string studySessionId)
     {
         List<string>? paragraphs = await GetFlashcardString(_userAuthService.GetUserUuid(), studySessionId);
-        List<string> results = await GetFlashcards(_kernel, _flashcardFunction, paragraphs);
-
-        for (int i = 0; i < results.Count; i++)
-        {
-            string unescaped = System.Text.RegularExpressions.Regex.Unescape(results[i]);
-            if (IsValidJson(unescaped))
-            {
-                results[i] = unescaped;
-            }
-            else
-            {
-                Console.WriteLine("The string is not a valid JSON.");
-            }
-        }
-
-
-        return results;
+        return await GetFlashcards(_kernel, _flashcardFunction, _destupidFunction, paragraphs);
     }
     
     public static bool IsValidJson(string strInput)
@@ -121,20 +165,47 @@ Format the flashcards in JSON, where each term is the key and the definition is 
 
         return chunks.Select(c => c.Text).ToList();;
     }
-    
-    private static async Task<List<string>> GetFlashcards(IKernel kernel, ISKFunction flashcardsFunction, List<string> paragraphs)
+
+    private async Task<string> GetFlashcards(IKernel kernel, ISKFunction flashcardsFunction, ISKFunction deStupidFunction, List<string> paragraphs)
     {
-        SKContext kernelContext = kernel.CreateNewContext();
+        ConcurrentBag<string> response = new();
 
+        var tasks = paragraphs.Select(async paragraph =>
+        {
+            SKContext kernelContext = kernel.CreateNewContext();
 
-        List<string> response = new();
-        // foreach (string section in paragraphs)
-        // {
-            kernelContext.Variables["INFORMATION"] = paragraphs.FirstOrDefault();
-            response.Add((await flashcardsFunction.InvokeAsync(kernelContext)).Result);
-        // }
+            kernelContext.Variables["INFORMATION"] = paragraph;  // Changed to use `paragraph` instead of `paragraphs.FirstOrDefault()`
+            var cards = (await flashcardsFunction.InvokeAsync(kernelContext)).Result;
 
-        return response;
+            //kernelContext.Variables["FLASHCARDS"] = cards;
+
+            //var dresponse = (await deStupidFunction.InvokeAsync(kernelContext)).Result;
+            response.Add(cards);
+        });
+
+        await Task.WhenAll(tasks);
+        var merged = MergeJsonObjects(response);
+
+        var kernelContext = kernel.CreateNewContext();
+        kernelContext.Variables["JOINED"] = merged;
+
+        return (await _deDupeFunction.InvokeAsync(kernelContext)).Result;
+    }
+
+    static string MergeJsonObjects(IEnumerable<string> jsonStrings)
+    {
+        JObject mergedObject = new JObject();
+
+        foreach (string jsonString in jsonStrings)
+        {
+            JObject jsonObject = JObject.Parse(jsonString);
+            mergedObject.Merge(jsonObject, new JsonMergeSettings
+            {
+                MergeArrayHandling = MergeArrayHandling.Union
+            });
+        }
+
+        return mergedObject.ToString();
     }
 
 }
