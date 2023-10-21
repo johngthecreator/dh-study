@@ -1,9 +1,10 @@
 using Azure;
-using Azure.Storage;
 using Azure.Storage.Blobs;
+using System.Text.Json;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
 using Newtonsoft.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Backend.AzureBlobStorage;
 
@@ -19,6 +20,46 @@ public class UploadAzure
         _blobUserContainer = blobServiceClient.GetBlobContainerClient("user-files");
     }
 
+    public void UploadStream(Stream stream)
+    {
+        var blob = _blobUserContainer.GetBlobClient("testingContainer");
+        blob.UploadAsync(stream, true);
+    }
+
+    public async IAsyncEnumerable<List<string>> DownloadParagraphEmbeddings(string blobPath)
+    {
+        BlobDownloadInfo blobDownloadInfo = await _blobUserContainer.GetBlobClient(blobPath).DownloadAsync();
+
+        // Step 2: Read the data into a string
+        using StreamReader reader = new StreamReader(blobDownloadInfo.Content);
+        var json = await reader.ReadToEndAsync();
+
+        // Step 3: Deserialize the string back into a list of lists of paragraphs
+        List<List<string>> paragraphsList = JsonSerializer.Deserialize<List<List<string>>>(json);
+    
+        // Yield each list of paragraphs asynchronously
+        foreach (var paragraphList in paragraphsList)
+        {
+            yield return paragraphList;
+        }
+    }
+
+    public string TryDownloadBlob(string userId, string sessionId, string actualFileName)
+    {
+        string blobFilePath = $"{userId}/{sessionId}/Content/{actualFileName}";
+        try
+        {
+            BlobClient blobClient = _blobUserContainer.GetBlobClient(blobFilePath);
+            string tempPath = Path.Combine(Path.GetTempPath(), blobFilePath);
+            blobClient.DownloadTo(tempPath);
+            return tempPath;
+        }
+        catch (Exception e)
+        {
+            return "file does not exist";
+        }
+    }
+    
     private string GetSensitiveString(string sensitiveSettingsKey)
     {
         return _configuration.GetConnectionString(sensitiveSettingsKey);

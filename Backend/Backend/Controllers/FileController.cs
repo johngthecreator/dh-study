@@ -1,5 +1,5 @@
-using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using Backend.AzureBlobStorage;
 using Backend.Services.DataService;
 
@@ -25,9 +25,12 @@ public class FileController : ControllerBase
             return BadRequest("No file uploaded.");
 
         string tempFilePath = Guid.NewGuid() + Path.GetExtension(file.FileName); 
-        await using (FileStream fileStream = new FileStream(tempFilePath, FileMode.Create))
+        await using (Stream stream = new FileStream(tempFilePath, FileMode.Create))
         {
-            await file.CopyToAsync(fileStream);
+            EmbeddingService embeddingService = new EmbeddingService(stream, file.FileName);
+            string json = JsonSerializer.Serialize(embeddingService.Paragraphs);
+            using MemoryStream jsonStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            _uploadAzure.UploadStream(jsonStream);
         }
         await _uploadAzure.UploadToCloud("sebDunn", "compsci", tempFilePath, file.FileName);
         System.IO.File.Delete(tempFilePath);
