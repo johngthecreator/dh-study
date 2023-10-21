@@ -21,3 +21,4 @@ dist-ssr
 *.ntvs*
 *.njsproj
 *.sw?
+/Backend/Backend/sensitivesettings.json
