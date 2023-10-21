@@ -5,8 +5,10 @@ using System.IO;
 using System.Threading.Tasks;
 
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 
 using Microsoft.Azure.Cosmos;
+using Microsoft.SemanticKernel.Memory;
 
 public class DataService : IDataService
 {
@@ -30,15 +32,29 @@ public class DataService : IDataService
         var blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
         await blobContainerClient.CreateIfNotExistsAsync();
 
-        // Include userId in the blob's path
-        var blobClient = blobContainerClient.GetBlobClient($"{userId}/{studySessionId}/content/{fileName}");
+        var id = Guid.NewGuid().ToString();
 
-        await blobClient.UploadAsync(fileStream, true);
+        // Include userId in the blob's path
+        var blobClient = blobContainerClient.GetBlobClient($"{userId}/{studySessionId}/content/{id}");
+
+        // Parse the file type from the file name
+        string fileType = Path.GetExtension(fileName);
+
+        var uploadOptions = new BlobUploadOptions
+        {
+            Metadata = new Dictionary<string, string>
+            {
+                { "fileType", fileType }
+            }
+        };
+
+        await blobClient.UploadAsync(fileStream, uploadOptions);
+
         fileStream.Close();
 
         var document = new UserDocument
         {
-            id = Guid.NewGuid().ToString(),
+            id = id,
             FileName = fileName,
             FileId = blobClient.Uri.AbsoluteUri,
             SessionId = studySessionId,
@@ -66,7 +82,7 @@ public class DataService : IDataService
 
     public async Task<IEnumerable<StudySession>> GetStudySessions(string userId)
     {
-        var sqlQueryText = $"SELECT * FROM c WHERE c.userId = @userId";
+        var sqlQueryText = $"SELECT * FROM c WHERE c.UserId = @userId";
         var queryDefinition = new QueryDefinition(sqlQueryText).WithParameter("@userId", userId);
         var queryResultSetIterator = _sessionsContainer.GetItemQueryIterator<StudySession>(queryDefinition);
 
@@ -86,7 +102,7 @@ public class DataService : IDataService
 
     public async Task<IEnumerable<UserDocument>> GetSessionDocuments(string userId, string studySessionId)
     {
-        var sqlQueryText = $"SELECT * FROM c WHERE c.studySessionId = @sessionId";
+        var sqlQueryText = $"SELECT * FROM c WHERE c.SessionId = @sessionId";
         var queryDefinition = new QueryDefinition(sqlQueryText).WithParameter("@sessionId", studySessionId);
         var queryResultSetIterator = _filesContainer.GetItemQueryIterator<UserDocument>(queryDefinition);
 
@@ -122,5 +138,10 @@ public class DataService : IDataService
         memoryStream.Position = 0;
 
         return (memoryStream, fileType);
+    }
+
+    public Task<ISemanticTextMemory> GetMemory(string userId, string studySessionId)
+    {
+        throw new NotImplementedException();
     }
 }

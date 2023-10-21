@@ -1,4 +1,6 @@
-﻿namespace Backend.Services.DataService;
+﻿using Microsoft.SemanticKernel.Memory;
+
+namespace Backend.Services.DataService;
 
 public interface IDataService
 {
@@ -8,6 +10,8 @@ public interface IDataService
     public Task<IEnumerable<UserDocument>> GetSessionDocuments(string userId, string studySessionId);
 
     public Task<(Stream File, string FileType)> GetFile(string userId, string studySessionId, string fileId);
+
+    public Task<ISemanticTextMemory> GetMemory(string userId, string studySessionId);
 }
 
 public class StudySession

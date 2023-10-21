@@ -9,9 +9,9 @@ public class EmbeddingService
 {
     public List<string>? Paragraphs;
 
-    public EmbeddingService(Stream stream, string filePath)
+    public EmbeddingService(Stream stream, string fileType)
     {
-        string? fileToEmbed = ParseFile(stream, filePath);
+        string? fileToEmbed = ParseFile(stream, fileType);
         List<string> lines = SplitPlainTextLines(fileToEmbed, 1500);
         Paragraphs = SplitPlainTextParagraphs(lines, 1500);
     }

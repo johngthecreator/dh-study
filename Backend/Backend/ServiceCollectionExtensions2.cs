@@ -11,7 +11,9 @@ public static class ServiceCollectionExtensions2
             services
 
                 .AddScoped<IDataService, DataService>()
+                .AddScoped<TextEmbeddingService>()
                 .AddScoped<IUserAuthService, DevUserAuthService>();
+            
     
     }
 }
