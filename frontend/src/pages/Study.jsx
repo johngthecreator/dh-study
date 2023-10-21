@@ -3,6 +3,7 @@ import Quiz from "../components/Quiz";
 import Header from "../components/Header";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 import Upload from "../components/Upload";
+import Chat from "../components/chat";
 
 export default function Study(){
     return(
@@ -22,7 +23,7 @@ export default function Study(){
                         <Quiz />
                     </TabPanel>
                     <TabPanel>
-                    <p>Threeee</p>
+                        <Chat />
                     </TabPanel>
                 </TabPanels>
             </Tabs>
