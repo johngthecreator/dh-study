@@ -40,7 +40,9 @@ export default function Header(){
                     </MenuItem>
                 </MenuList>
             </Menu>
-            <h1 className='text-3xl text-white font-extrabold mx-3'>PureLearn</h1>
+            <a href='/'>
+                <h1 className='text-3xl text-white font-extrabold mx-3'>PureLearn</h1>
+            </a>
         </header>
     )
 }
