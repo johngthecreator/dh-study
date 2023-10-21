@@ -5,23 +5,37 @@ import Upload from "../components/Upload";
 import axios from "axios";
 import { uuidAtom } from "../atoms/uuidAtom";
 import { useAtom } from "jotai";
+import { useNavigate } from "react-router-dom";
 
 export default function Home(){
     const [recentSessions, setRecentSessions] = useState([]);
-    // const [uuid, ] = useAtom(uuidAtom);
-    const uuid = "_dev3"
+    const [uuid, ] = useAtom(uuidAtom);
+    const navigate = useNavigate();
+
     useEffect(()=>{
-        axios.post("https://purelearnmono.azurewebsites.net/StudySession/getsessions",{},{})
-        .then(resp=>{
-            let uuidSessions = []
-            for(let i in resp.data){
-                if(resp.data[i].userId == uuid){
-                    uuidSessions.push(resp.data[i]);
+        if(!uuid){
+            navigate("/login");
+        }else{
+            navigate("/");
+        }
+
+        if(uuid){
+            axios.post("https://purelearnmono.azurewebsites.net/StudySession/getsessions",{},{
+                headers:{
+                    'Authorization': `Bearer ${uuid}`
                 }
-            }
-            setRecentSessions(uuidSessions);
-        })
-        .catch(e=>console.error(e));
+            })
+            .then(resp=>{
+                let uuidSessions = []
+                for(let i in resp.data){
+                    if(resp.data[i].userId == uuid){
+                        uuidSessions.push(resp.data[i]);
+                    }
+                }
+                setRecentSessions(uuidSessions);
+            })
+            .catch(e=>console.error(e));
+        }
     }, [])
     return(
         <div className="h-screen w-full">

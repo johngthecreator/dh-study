@@ -5,6 +5,7 @@ import { useAtom } from 'jotai';
 import { quizAtom } from '../atoms/quizAtom';
 import { LineWobble } from "@uiball/loaders"
 import axios from 'axios';
+import { uuidAtom } from '../atoms/uuidAtom';
 
 function MultipleChoice(props){
     const [userAnswer, setUserAnswer] = useState(null);
@@ -44,9 +45,14 @@ function MultipleChoice(props){
 export default function Quiz(){
     const [sessionId, ] = useAtom(sessionIdAtom);
     const [quiz, setQuiz] = useAtom(quizAtom);
+    const [uuid, ] = useAtom(uuidAtom);
     useEffect(()=>{
         if(sessionId && !quiz){
-            axios.post(`https://purelearnmono.azurewebsites.net/AiTools/createMultipleChioce?studySessionId=${sessionId}`)
+            axios.post(`https://purelearnmono.azurewebsites.net/AiTools/createMultipleChioce?studySessionId=${sessionId}`,{},{
+                headers:{
+                    'Authorization': `Bearer ${uuid}`
+                }
+            })
             .then(resp=>{
                 setQuiz(resp.data);
             })

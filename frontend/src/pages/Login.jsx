@@ -3,9 +3,11 @@ import { auth } from "../firebase";
 import axios from "axios";
 import { useAtom } from 'jotai';
 import { uuidAtom } from "../atoms/uuidAtom";
+import { useNavigate } from "react-router-dom";
 
 export default function Login(){
     const [, setUuid] = useAtom(uuidAtom);
+    const navigate = useNavigate();
     const GoogleSignIn = () => {
         const provider = new GoogleAuthProvider();
         signInWithPopup(auth, provider)
@@ -19,14 +21,14 @@ export default function Login(){
             // const uid = user.uid
             // const name = user.displayName
             const uidToken = await user.getIdToken();
-            if (token) {
+            if (uidToken) {
                 axios.post("https://purelearnmono.azurewebsites.net/test",{}, {headers:{
                     'Authorization': `Bearer ${uidToken}`
                 }})
                 .then((resp)=>{
-                    const uuidDirty = resp.data.id
-                    const uuid = uuidDirty.split(":")[1]
-                    setUuid(uuid);
+                    console.log(resp);
+                    setUuid(uidToken);
+                    navigate("/");
                 })
                 .catch((e)=>{console.error(e)})
             }
