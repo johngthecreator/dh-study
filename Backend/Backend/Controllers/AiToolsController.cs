@@ -28,7 +28,8 @@ public class AiToolsController : ControllerBase
     public async Task<IActionResult> PostQuestion([FromBody] QuestionModel questionModel)
     {
         if (string.IsNullOrEmpty(questionModel?.Question)) return BadRequest("Question cannot be empty");
-        List<string> responses = await _chatAiService.Execute("compsci", questionModel.Question, "f581f3ea-ea78-4dd0-8128-08b98bd7b0d1");
+        //TODO: ADD 
+        List<string> responses = await _chatAiService.Execute("compsci", questionModel.Question, "622e1e17-e1e1-4a15-8b37-a57073e12052");
         string response = responses[0];
         return Ok(new { response });
     }
@@ -37,7 +38,7 @@ public class AiToolsController : ControllerBase
     [Route("AiTools/createFlashcards")]
     public async Task<IActionResult> CreateFlashcards([FromForm] string sessionToScrape)
     {
-        List<string> responses = await _flashcardService.Execute(sessionToScrape, "", "f581f3ea-ea78-4dd0-8128-08b98bd7b0d1");
+        List<string> responses = await _flashcardService.Execute(sessionToScrape, "", "622e1e17-e1e1-4a15-8b37-a57073e12052");
         string response = responses[0];
         return Ok(new { response });
     }

@@ -27,12 +27,12 @@ public class ChatAiService : BaseAiService
         _chatFunction = RegisterChatFunction(_kernel);
     }
 
-    public override async Task<List<string>> Execute(string fileName, string userQuestion, string studySessionId)
+    public override async Task<List<string>> Execute(string memoryCollectionName, string userQuestion, string studySessionId)
     {
         //TODO
         string userId = _userAuthService.GetUserUuid();
         await RefreshMemory(_kernel, userId, studySessionId);
-        return new List<string> { await GetChatResponse(_kernel, _chatFunction, userQuestion, fileName) };
+        return new List<string> { await GetChatResponse(_kernel, _chatFunction, userQuestion, memoryCollectionName) };
     }
 
     private static ISKFunction RegisterChatFunction(IKernel kernel)
@@ -71,15 +71,15 @@ public class ChatAiService : BaseAiService
     }
 
     private static async Task<string> GetChatResponse(IKernel kernel, ISKFunction chatFunction, string userQuestion,
-        string fileName)
+        string memoryCollectionName)
     {
         SKContext kernelContext = kernel.CreateNewContext();
 
         string? fileContext = null;
-        IEnumerable<Chunk> chunks = await _textEmbeddingService.GetChunks("matthew_dev", "f581f3ea-ea78-4dd0-8128-08b98bd7b0d1");
-        string memoryCollection = "matthew_dev/f581f3ea-ea78-4dd0-8128-08b98bd7b0d1";
+        IEnumerable<Chunk> chunks = await _textEmbeddingService.GetChunks("matthew_dev", "622e1e17-e1e1-4a15-8b37-a57073e12052");
+        string memoryCollection = "matthew_dev/622e1e17-e1e1-4a15-8b37-a57073e12052";
         foreach (Chunk chunk in chunks)
-            await kernel.Memory.SaveInformationAsync(fileName, chunk.Text, chunk.GetHashCode().ToString(),
+            await kernel.Memory.SaveInformationAsync(memoryCollectionName, chunk.Text, chunk.GetHashCode().ToString(),
                 chunk.SourceFile);
         await foreach (MemoryQueryResult memory in kernel.Memory.SearchAsync(memoryCollection, userQuestion, 5, 0.5))
             fileContext = fileContext + Environment.NewLine + memory.Metadata.Text;

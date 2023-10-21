@@ -30,7 +30,7 @@ public abstract class BaseAiService : IAiService
         _kernel = kernelService.KernelBuilder;
     }
 
-    public abstract Task<List<string>> Execute(string fileName, string userQuestion, string studySessionId);
+    public abstract Task<List<string>> Execute(string memoryCollectionName, string userQuestion, string studySessionId);
 
     /// <summary>
     ///     This is only for chataiservice right now
@@ -41,7 +41,7 @@ public abstract class BaseAiService : IAiService
     protected async Task RefreshMemory(IKernel kernel, string userId, string studySessionId)
     {
         IEnumerable<Chunk> chunks = await _textEmbeddingService.GetChunks(userId, studySessionId);
-        const string memoryCollectionName = "matthew_dev/f581f3ea-ea78-4dd0-8128-08b98bd7b0d1";
+        const string memoryCollectionName = "matthew_dev/622e1e17-e1e1-4a15-8b37-a57073e12052";
         foreach (Chunk chunk in chunks)
             await kernel.Memory.SaveInformationAsync(memoryCollectionName, chunk.Text, chunk.GetHashCode().ToString(),
                 chunk.SourceFile);

@@ -64,9 +64,9 @@ Please make comprehensive and detailed multiple-choice test questions based on t
         return kernel.RegisterSemanticFunction("CreateMultipleChoices", "ImportantInfoMultipleChoices", functionConfig);
     }
 
-    public override async Task<List<string>> Execute(string fileName, string fileForContext, string studySessionId)
+    public override async Task<List<string>> Execute(string memoryCollectionName, string fileForContext, string studySessionId)
     {
-        await RefreshMemory(_kernel, fileName, "");
+        await RefreshMemory(_kernel, memoryCollectionName, "");
         return await GetMultipleChoiceResponse(_kernel, _multipleChoiceFunction, fileForContext);
     }
 
