@@ -14,13 +14,12 @@ public class FlashcardService : BaseAiService
     private readonly IKernel _kernel;
     private readonly KernelService _kernelService;
     private readonly ISKFunction _multipleChoiceFunction;
-    private readonly UploadAzure _uploadAzure;
     private readonly IUserAuthService _userAuthService;
 
-    public FlashcardService(IConfiguration configuration, UploadAzure uploadAzure,
+    public FlashcardService(IConfiguration configuration,
         EmbeddingCacheService embeddingCacheService,
         KernelService kernelService, TextEmbeddingService textEmbeddingService, IUserAuthService userAuthService) :
-        base(configuration, uploadAzure,
+        base(configuration,
             embeddingCacheService, kernelService, textEmbeddingService, userAuthService)
     {
         _userAuthService = userAuthService;

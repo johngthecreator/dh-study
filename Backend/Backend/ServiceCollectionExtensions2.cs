@@ -10,9 +10,9 @@ public static class ServiceCollectionExtensions2
         return 
             services
 
-                .AddScoped<IDataService, DataService>()
-                .AddScoped<TextEmbeddingService>()
-                .AddScoped<IUserAuthService, DevUserAuthService>();
+                .AddSingleton<IDataService, DataService>()
+                .AddSingleton<TextEmbeddingService>()
+                .AddSingleton<IUserAuthService, DevUserAuthService>();
             
     
     }

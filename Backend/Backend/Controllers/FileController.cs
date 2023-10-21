@@ -9,12 +9,10 @@ namespace Backend.Controllers;
 
 public class FileController : ControllerBase
 {
-    private readonly UploadAzure _uploadAzure;
     private readonly IDataService _dataService;
 
-    public FileController(UploadAzure uploadAzure, IDataService dataService)
+    public FileController(IDataService dataService)
     {
-        _uploadAzure = uploadAzure;
         _dataService = dataService;
     }
 

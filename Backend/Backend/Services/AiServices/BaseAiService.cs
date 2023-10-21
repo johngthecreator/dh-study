@@ -12,18 +12,16 @@ public abstract class BaseAiService : IAiService
     private readonly EmbeddingCacheService _embeddingCacheService;
     private readonly IKernel _kernel;
     private readonly KernelService _kernelService;
-    private readonly UploadAzure _uploadAzure;
     private readonly IUserAuthService _userAuthService;
     private string _getApiKey = _apiKey;
     private readonly TextEmbeddingService _textEmbeddingService;
 
-    protected BaseAiService(IConfiguration configuration, UploadAzure uploadAzure,
+    protected BaseAiService(IConfiguration configuration,
         EmbeddingCacheService embeddingCacheService, KernelService kernelService,
         TextEmbeddingService textEmbeddingService,
         IUserAuthService userAuthService)
     {
         _configuration = configuration;
-        _uploadAzure = uploadAzure;
         _embeddingCacheService = embeddingCacheService;
         _kernelService = kernelService;
         _textEmbeddingService = textEmbeddingService;
@@ -43,7 +41,7 @@ public abstract class BaseAiService : IAiService
     protected async Task RefreshMemory(IKernel kernel, string userId, string studySessionId)
     {
         IEnumerable<Chunk> chunks = await _textEmbeddingService.GetChunks(userId, studySessionId);
-        string fileName = $"{userId}/{studySessionId}";
+        string fileName = $"{userId}/f581f3ea-ea78-4dd0-8128-08b98bd7b0d1";
         foreach (Chunk chunk in chunks)
             await kernel.Memory.SaveInformationAsync(fileName, chunk.Text, chunk.GetHashCode().ToString(),
                 chunk.SourceFile);

@@ -12,16 +12,13 @@ public class StudySessionController : Controller
 {
     private readonly IDataService _dataService;
     private readonly IUserAuthService _userAuthService;
-    private readonly UploadAzure _uploadAzure;
 
     public StudySessionController(
         IDataService dataService,
-        IUserAuthService userAuthService,
-        UploadAzure uploadAzure)
+        IUserAuthService userAuthService)
     {
         _dataService = dataService;
         _userAuthService = userAuthService;
-        _uploadAzure = uploadAzure;
     }
 
     [HttpPost("makesession")]

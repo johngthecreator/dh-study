@@ -12,10 +12,10 @@ public class MultipleChoiceService : BaseAiService
     private readonly ISKFunction _multipleChoiceFunction;
     private readonly IUserAuthService _userAuthService;
 
-    public MultipleChoiceService(IConfiguration configuration, UploadAzure uploadAzure,
+    public MultipleChoiceService(IConfiguration configuration,
         EmbeddingCacheService embeddingCacheService,
         KernelService kernelService, TextEmbeddingService textEmbeddingService, IUserAuthService userAuthService) :
-        base(configuration, uploadAzure,
+        base(configuration,
             embeddingCacheService, kernelService, textEmbeddingService, userAuthService)
     {
         _userAuthService = userAuthService;
@@ -66,7 +66,7 @@ Please make comprehensive and detailed multiple-choice test questions based on t
 
     public override async Task<List<string>> Execute(string fileName, string userQuestion, string studySessionId)
     {
-        await RefreshMemory(_kernel, fileName);
+        await RefreshMemory(_kernel, fileName, "");
         return await GetMultipleChoiceResponse(_kernel, _multipleChoiceFunction, userQuestion);
     }
 

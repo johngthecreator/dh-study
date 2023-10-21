@@ -23,8 +23,7 @@ public class ChatController : ControllerBase
     public async Task<IActionResult> PostQuestion([FromBody] QuestionModel questionModel)
     {
         if (string.IsNullOrEmpty(questionModel?.Question)) return BadRequest("Question cannot be empty");
-        const string fileName = "testingContainer.json";
-        List<string> responses = await _chatAiService.Execute(fileName, questionModel.Question);
+        List<string> responses = await _chatAiService.Execute("compsci", questionModel.Question, "f581f3ea-ea78-4dd0-8128-08b98bd7b0d1");
         string response = responses[0];
         return Ok(new { response });
     }

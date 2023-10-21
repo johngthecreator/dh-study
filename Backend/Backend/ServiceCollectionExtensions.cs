@@ -10,11 +10,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<KernelService>();
         services.AddMemoryCache();
-        services.AddScoped<EmbeddingCacheService>();
-        services.AddScoped<ChatAiService>();
-        services.AddScoped<FlashcardService>();
-        services.AddScoped<MultipleChoiceService>();
-        services.AddScoped<UploadAzure>();
+        services.AddSingleton<EmbeddingCacheService>();
+        services.AddSingleton<ChatAiService>();
+        services.AddSingleton<FlashcardService>();
+        services.AddSingleton<MultipleChoiceService>();
         return services;
     }
 }
