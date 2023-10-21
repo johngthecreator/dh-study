@@ -79,14 +79,14 @@ public class UploadAzure
     private async Task UpdateSessionMetaData(string sessionId, string userId, BlobBaseClient fileBlob, string fileName)
     {
         BlobClient? metadataBlobClient = _blobUserContainer.GetBlobClient($"{userId}/{sessionId}/metadata.json");
-        SessionMetadata sessionMetadata = new SessionMetadata();
+        StudySessionMetadata sessionMetadata = new StudySessionMetadata();
 
         try
         {
             Response<BlobDownloadInfo>? response = await metadataBlobClient.DownloadAsync();
             using StreamReader reader = new StreamReader(response.Value.Content);
             string existingMetadataJson = await reader.ReadToEndAsync();
-            sessionMetadata = JsonConvert.DeserializeObject<SessionMetadata>(existingMetadataJson);
+            sessionMetadata = JsonConvert.DeserializeObject<StudySessionMetadata>(existingMetadataJson);
         }
         catch (Exception e)
         {
