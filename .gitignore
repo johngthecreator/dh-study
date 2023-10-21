@@ -22,3 +22,4 @@ dist-ssr
 *.njsproj
 *.sw?
 /Backend/Backend/sensitivesettings.json
+/Backend/Backend/firebasekey.json
