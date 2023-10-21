@@ -2,6 +2,7 @@ import FlashCards from "../components/flashcards/FlashCards";
 import Header from "../components/Header";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 import Upload from "../components/Upload";
+import Quiz from "../components/Quiz";
 
 export default function Study(){
     return(
@@ -18,7 +19,7 @@ export default function Study(){
                         <FlashCards />
                     </TabPanel>
                     <TabPanel>
-                        <Upload />
+                        <Quiz />
 
                     </TabPanel>
                     <TabPanel>
