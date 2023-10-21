@@ -1,10 +1,29 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+import { useAtom } from 'jotai';
+import { sessionIdAtom } from '../atoms/sessionIdAtom';
+import { convoAtom } from '../atoms/convoAtom';
 
 export default function Chat() {
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useAtom(convoAtom);
+    const [sessionId,] = useAtom(sessionIdAtom);
   
     const handleSendMessage = async (text) => {
       setMessages([...messages, { sender: 'user', text }]);
+      // axios.post(`https://purelearnmono.azurewebsites.net/AiTools/chat?studySessionId=${sessionId}`,{
+      //   question:text
+
+      // },{
+      //     headers: {
+      //       'Content-Type': 'application/json'
+      //     }
+      // })
+      // .then(resp=>{
+      //   return(
+      //     <Message text={resp.data.reponse} sender={'bot'} />
+      //   )
+      // })
+
   
       // Here, you can add logic to send the user's message to a backend and update the state with the bot's reply.
       // For brevity, I've omitted that part. Add it if needed.
@@ -25,7 +44,7 @@ export default function Chat() {
 const ChatContainer = ({ children }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-200">
-      <div className="w-11/12 md:w-2/3 lg:w-1/2 xl:w-1/3 bg-white rounded-xl shadow-md p-4">
+      <div className="w-11/12 bg-white rounded-xl shadow-md p-4">
         {children}
       </div>
     </div>
@@ -64,7 +83,8 @@ const InputArea = ({ onSend }) => {
           className="w-full px-4 py-2 border rounded-lg"
           placeholder="Type your message..."
         />
-        <button 
+        <button
+          id="send"
           onClick={handleSend}
           className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#3E69A3] text-white px-4 py-2 rounded-lg"
         >

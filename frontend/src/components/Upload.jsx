@@ -5,6 +5,8 @@ import UploadModal from './UploadModal';
 import axios from 'axios';
 import { useAtom } from 'jotai';
 import { uuidAtom } from '../atoms/uuidAtom';
+import { sessionIdAtom } from '../atoms/sessionIdAtom';
+import { useNavigate } from 'react-router-dom';
 
 export default function Upload() {
     const [fileNames, setFileNames] = useState([]);
@@ -12,6 +14,8 @@ export default function Upload() {
     const [errorMessage, setErrorMessage] = useState('');
     const [sessionName, setSessionName] = useState('');
     const [uuid, ] = useAtom(uuidAtom);
+    const [ , setSessionId] = useAtom(sessionIdAtom);
+    const navigate = useNavigate();
 
     const removeFile = (i) => {
         const newItems = fileNames.filter((file, idx) => idx !== i);
@@ -47,20 +51,27 @@ export default function Upload() {
         return true;
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         const formData = new FormData();
         formData.append('sessionName', sessionName);
-        formData.append('files', files)
+        for (let i = 0; i < files.length; i++) {
+            formData.append('files', files[i]);
+        }
+
         if (validateFiles()) {
             axios.post("https://purelearnmono.azurewebsites.net/StudySession/makesession", formData, {
                 headers:{
                     'Content-Type': 'multipart/form-data',
                     'Authorization': `Bearer ${uuid}`
 
-                }})
-                .then(resp=>console.log(resp.data))
-                .catch(e=>console.error(e));
+            }})
+            .then(resp=>{
+                localStorage.removeItem('flashcards');
+                setSessionId(resp.data);
+                navigate("/study");
+            })
+            .catch(e=>console.error(e));
             // Handle the valid files here (e.g., upload them to a server)
         }
     };

@@ -12,13 +12,13 @@ export default function Header(){
         // <header className="flex flex-row bg-[#3E69A3] p-5 items-center">
         <header className="flex flex-row bg-blue-600 p-5 items-center">
             <div className='flex flex-row gap-5 items-center'>
-            <IconButton
+            {/* <IconButton
             colorScheme="dark"
             aria-label='menu button'
             icon={<HamburgerIcon boxSize={8}/>}
             ref={btnRef}
             onClick={onOpen}
-            />
+            /> */}
             </div>
             <Drawer
             isOpen={isOpen}
@@ -38,9 +38,9 @@ export default function Header(){
                 </DrawerBody>
             </DrawerContent>
             </Drawer>
-            <a href='/'>
+            <a href='/login'>
                 <div className='flex flex-row items-center'>
-                    <h1 className='text-3xl text-white font-extrabold ml-3'>PureLearn</h1>
+                    <h1 className='text-3xl text-white font-extrabold ml-3'>OctoLearn</h1>
                     <img src='./octo_logo_clear.png' className='h-[50px]'/>
                 </div>
             </a>
