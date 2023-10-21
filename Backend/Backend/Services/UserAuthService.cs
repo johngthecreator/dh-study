@@ -1,6 +1,8 @@
 ﻿using System.Security.Claims;
 
-public class UserAuthService
+using Backend.Services;
+
+public class UserAuthService : IUserAuthService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private string? _cachedUuid;

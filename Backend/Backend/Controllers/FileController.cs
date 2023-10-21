@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using Backend.AzureBlobStorage;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,12 +19,12 @@ public class FileController : ControllerBase
         if (file == null || file.Length == 0)
             return BadRequest("No file uploaded.");
 
-        string tempFilePath = Path.GetTempFileName();
+        string tempFilePath = Guid.NewGuid() + Path.GetExtension(file.FileName); 
         await using (FileStream fileStream = new FileStream(tempFilePath, FileMode.Create))
         {
             await file.CopyToAsync(fileStream);
         }
-        _uploadAzure.UploadToBlob("sebDunn", "compsci", tempFilePath);
+        await _uploadAzure.UploadToCloud("sebDunn", "compsci", tempFilePath, file.FileName);
         System.IO.File.Delete(tempFilePath);
         
         return Ok("uploaded");

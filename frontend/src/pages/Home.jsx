@@ -1,15 +1,18 @@
 import Folder from "../components/Folder";
 import Header from "../components/Header";
+import UploadModal from "../components/UploadModal";
 
 export default function Home(){
     return(
         <div className="h-screen w-full">
             <Header/>
             <div className="bg-[#BBCDE5] flex flex-col md:flex-row items-center text-[40px] font-bold gap-10 p-5">
-                <img src="./uploadcard.png" />
-                <div className="flex flex-col">
-                    <h2>Upload a file</h2>
-                    <h2>to get started!</h2>
+                <img src="./files.png" />
+                <div className="flex flex-col gap-5">
+                    <div>
+                        <p>Create a session</p>
+                        <p>to get started!</p>
+                    </div>
                 </div>
             </div>
             <div className="p-5">

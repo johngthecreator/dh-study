@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Authentication;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Configuration.AddJsonFile("sensitivesettings.json", optional: true);
+
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -38,8 +41,6 @@ FirebaseApp.Create(new AppOptions
 {
     Credential = GoogleCredential.FromFile("firebasekey.json")
 });
-
-builder.Configuration.AddJsonFile("sensitivesettings.json", optional: true);
 
 var app = builder.Build();
 
