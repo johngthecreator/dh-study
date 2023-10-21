@@ -12,11 +12,12 @@ public class QuestionModel
 public class AiToolsController : ControllerBase
 {
     private readonly ChatAiService _chatAiService;
-    private readonly  MultipleChoiceService _multipleChoiceService;
     private readonly FlashcardService _flashcardService;
+    private readonly MultipleChoiceService _multipleChoiceService;
 
 
-    public AiToolsController(ChatAiService chatAiService, MultipleChoiceService multipleChoiceService, FlashcardService flashcardService)
+    public AiToolsController(ChatAiService chatAiService, MultipleChoiceService multipleChoiceService,
+        FlashcardService flashcardService)
     {
         _chatAiService = chatAiService;
         _multipleChoiceService = multipleChoiceService;
@@ -27,12 +28,12 @@ public class AiToolsController : ControllerBase
     [Route("AiTools/chat")]
     public async Task<IActionResult> PostQuestion(QuestionModel questionModel, string studySessionId)
     {
-        if (string.IsNullOrEmpty(questionModel?.Question)) 
+        if (string.IsNullOrEmpty(questionModel?.Question))
             return BadRequest("Question cannot be empty");
         string response = await _chatAiService.Execute(questionModel.Question, studySessionId);
         return Ok(new { response });
     }
-    
+
     [HttpPost]
     [Route("AiTools/createFlashcards")]
     public async Task<IActionResult> CreateFlashcards(string? studySessionId)
@@ -40,7 +41,7 @@ public class AiToolsController : ControllerBase
         List<string> responses = await _flashcardService.Execute(studySessionId);
         return Ok(responses);
     }
-    
+
     [HttpPost]
     [Route("AiTools/createMultipleChioce")]
     public async Task<IActionResult> CreateMultipleChoice(string? studySessionId)

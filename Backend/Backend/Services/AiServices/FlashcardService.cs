@@ -1,5 +1,4 @@
-using Backend.AzureBlobStorage;
-using Backend.Services.DataService;
+using System.Text.RegularExpressions;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SemanticFunctions;
@@ -9,16 +8,16 @@ using Newtonsoft.Json.Linq;
 
 namespace Backend.Services.AiServices;
 
-public class FlashcardService 
+public class FlashcardService
 {
     private readonly IConfiguration _configuration;
     private readonly EmbeddingCacheService _embeddingCacheService;
-    private ISKFunction _flashcardFunction;
 
     private readonly IKernel _kernel;
     private readonly KernelService _kernelService;
-    private readonly IUserAuthService _userAuthService;
     private readonly TextEmbeddingService _textEmbeddingService;
+    private readonly IUserAuthService _userAuthService;
+    private readonly ISKFunction _flashcardFunction;
 
     public FlashcardService(IConfiguration configuration, KernelService kernelService,
         IUserAuthService userAuthService, TextEmbeddingService textEmbeddingService)
@@ -70,27 +69,22 @@ Format the flashcards in JSON, where each term is the key and the definition is 
 
         for (int i = 0; i < results.Count; i++)
         {
-            string unescaped = System.Text.RegularExpressions.Regex.Unescape(results[i]);
+            string unescaped = Regex.Unescape(results[i]);
             if (IsValidJson(unescaped))
-            {
                 results[i] = unescaped;
-            }
             else
-            {
                 Console.WriteLine("The string is not a valid JSON.");
-            }
         }
 
 
         return results;
     }
-    
+
     public static bool IsValidJson(string strInput)
     {
         strInput = strInput.Trim();
         if ((strInput.StartsWith("{") && strInput.EndsWith("}")) || // For an object
             (strInput.StartsWith("[") && strInput.EndsWith("]"))) // For an array
-        {
             try
             {
                 JToken.Parse(strInput);
@@ -107,21 +101,20 @@ Format the flashcards in JSON, where each term is the key and the definition is 
                 Console.WriteLine(ex.ToString());
                 return false;
             }
-        }
-        else
-        {
-            return false;
-        }
+
+        return false;
     }
 
     private async Task<List<string>> GetFlashcardString(string? userId, string studySessionId)
     {
         IEnumerable<Chunk> chunks = await _textEmbeddingService.GetChunks(userId, studySessionId);
 
-        return chunks.Select(c => c.Text).ToList();;
+        return chunks.Select(c => c.Text).ToList();
+        ;
     }
-    
-    private static async Task<List<string>> GetFlashcards(IKernel kernel, ISKFunction flashcardsFunction, List<string> contextFile)
+
+    private static async Task<List<string>> GetFlashcards(IKernel kernel, ISKFunction flashcardsFunction,
+        List<string> contextFile)
     {
         SKContext kernelContext = kernel.CreateNewContext();
 
@@ -135,5 +128,4 @@ Format the flashcards in JSON, where each term is the key and the definition is 
 
         return response;
     }
-
 }

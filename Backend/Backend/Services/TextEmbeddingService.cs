@@ -13,7 +13,7 @@ public class TextEmbeddingService
 
     public async Task<IEnumerable<Chunk>> GetChunks(string? userId, string studySessionId)
     {
-        List<Chunk> chunks = new List<Chunk>();
+        List<Chunk> chunks = new();
 
         IEnumerable<UserDocument> files = await _dataService.GetSessionDocuments(userId, studySessionId);
 
@@ -24,7 +24,7 @@ public class TextEmbeddingService
             {
                 (stream, string ext) = await _dataService.GetFile(userId, studySessionId, file.id);
 
-                EmbeddingService es = new EmbeddingService(stream, ext);
+                EmbeddingService es = new(stream, ext);
 
                 foreach (string chunk in es.Paragraphs)
                     chunks.Add(new Chunk

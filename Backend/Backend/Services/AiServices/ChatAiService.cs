@@ -1,4 +1,3 @@
-using Backend.AzureBlobStorage;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Orchestration;
@@ -7,12 +6,12 @@ using Microsoft.SemanticKernel.SkillDefinition;
 
 namespace Backend.Services.AiServices;
 
-public class ChatAiService 
+public class ChatAiService
 {
+    private static TextEmbeddingService _textEmbeddingService;
     private readonly ISKFunction _chatFunction;
 
     private readonly IKernel _kernel;
-    private static TextEmbeddingService _textEmbeddingService;
     private readonly IUserAuthService _userAuthService;
 
     public ChatAiService(IConfiguration configuration,
@@ -32,11 +31,12 @@ public class ChatAiService
         string memoryCollectionName = $"{userId}/{studySessionId}";
         await RefreshMemory(_kernel, userId, studySessionId, memoryCollectionName);
         string responses = await GetChatResponse(_kernel, _chatFunction, userQuestion, memoryCollectionName);
-        
+
         return responses;
     }
-    
-    private async Task RefreshMemory(IKernel kernel, string? userId, string studySessionId, string memoryCollectionName)
+
+    private static async Task RefreshMemory(IKernel kernel, string? userId, string studySessionId,
+        string memoryCollectionName)
     {
         IEnumerable<Chunk> chunks = await _textEmbeddingService.GetChunks(userId, studySessionId);
         foreach (Chunk chunk in chunks)
@@ -85,7 +85,8 @@ public class ChatAiService
         SKContext kernelContext = kernel.CreateNewContext();
 
         string? fileContext = null;
-        IEnumerable<Chunk> chunks = await _textEmbeddingService.GetChunks("matthew_dev", "622e1e17-e1e1-4a15-8b37-a57073e12052");
+        IEnumerable<Chunk> chunks =
+            await _textEmbeddingService.GetChunks("matthew_dev", "622e1e17-e1e1-4a15-8b37-a57073e12052");
         string memoryCollection = "matthew_dev/622e1e17-e1e1-4a15-8b37-a57073e12052";
         foreach (Chunk chunk in chunks)
             await kernel.Memory.SaveInformationAsync(memoryCollectionName, chunk.Text, chunk.GetHashCode().ToString(),

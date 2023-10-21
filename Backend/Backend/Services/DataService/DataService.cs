@@ -1,14 +1,9 @@
-﻿namespace Backend.Services.DataService;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
-
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-
 using Microsoft.Azure.Cosmos;
 using Microsoft.SemanticKernel.Memory;
+
+namespace Backend.Services.DataService;
 
 public class DataService : IDataService
 {
@@ -21,7 +16,7 @@ public class DataService : IDataService
     {
         _blobServiceClient = new BlobServiceClient(configuration.GetConnectionString("AzureBlobConnectionString1"));
         _cosmosClient = new CosmosClient(configuration.GetConnectionString("CosmosDb"));
-        var database = _cosmosClient.GetDatabase("userDataMap");
+        Database? database = _cosmosClient.GetDatabase("userDataMap");
         _filesContainer = database.GetContainer("sessionFiles");
         _sessionsContainer = database.GetContainer("studySessions");
     }
@@ -29,18 +24,18 @@ public class DataService : IDataService
     public async Task UploadFile(string fileName, string studySessionId, string userId, Stream fileStream)
     {
         string containerName = "data"; // It could be a more general name or specified in the configuration
-        var blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+        BlobContainerClient? blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
         await blobContainerClient.CreateIfNotExistsAsync();
 
-        var id = Guid.NewGuid().ToString();
+        string id = Guid.NewGuid().ToString();
 
         // Include userId in the blob's path
-        var blobClient = blobContainerClient.GetBlobClient($"{userId}/{studySessionId}/content/{id}");
+        BlobClient? blobClient = blobContainerClient.GetBlobClient($"{userId}/{studySessionId}/content/{id}");
 
         // Parse the file type from the file name
         string fileType = Path.GetExtension(fileName);
 
-        var uploadOptions = new BlobUploadOptions
+        BlobUploadOptions uploadOptions = new BlobUploadOptions
         {
             Metadata = new Dictionary<string, string>
             {
@@ -52,7 +47,7 @@ public class DataService : IDataService
 
         fileStream.Close();
 
-        var document = new UserDocument
+        UserDocument document = new UserDocument
         {
             id = id,
             FileName = fileName,
@@ -66,9 +61,9 @@ public class DataService : IDataService
 
     public async Task<string> CreateStudySession(string studySessionName, string userId)
     {
-        var id = Guid.NewGuid().ToString();
+        string id = Guid.NewGuid().ToString();
 
-        var studySession = new StudySession
+        StudySession studySession = new StudySession
         {
             Name = studySessionName,
             id = Guid.NewGuid().ToString(),
@@ -82,19 +77,17 @@ public class DataService : IDataService
 
     public async Task<IEnumerable<StudySession>> GetStudySessions(string userId)
     {
-        var sqlQueryText = $"SELECT * FROM c WHERE c.UserId = @userId";
-        var queryDefinition = new QueryDefinition(sqlQueryText).WithParameter("@userId", userId);
-        var queryResultSetIterator = _sessionsContainer.GetItemQueryIterator<StudySession>(queryDefinition);
+        string sqlQueryText = "SELECT * FROM c WHERE c.UserId = @userId";
+        QueryDefinition? queryDefinition = new QueryDefinition(sqlQueryText).WithParameter("@userId", userId);
+        FeedIterator<StudySession>? queryResultSetIterator =
+            _sessionsContainer.GetItemQueryIterator<StudySession>(queryDefinition);
 
-        List<StudySession> studySessions = new List<StudySession>();
+        List<StudySession> studySessions = new();
 
         while (queryResultSetIterator.HasMoreResults)
         {
-            var currentResultSet = await queryResultSetIterator.ReadNextAsync();
-            foreach (var session in currentResultSet)
-            {
-                studySessions.Add(session);
-            }
+            FeedResponse<StudySession>? currentResultSet = await queryResultSetIterator.ReadNextAsync();
+            foreach (StudySession? session in currentResultSet) studySessions.Add(session);
         }
 
         return studySessions;
@@ -102,19 +95,18 @@ public class DataService : IDataService
 
     public async Task<IEnumerable<UserDocument>> GetSessionDocuments(string? userId, string studySessionId)
     {
-        var sqlQueryText = $"SELECT * FROM c WHERE c.SessionId = @sessionId";
-        var queryDefinition = new QueryDefinition(sqlQueryText).WithParameter("@sessionId", studySessionId);
-        var queryResultSetIterator = _filesContainer.GetItemQueryIterator<UserDocument>(queryDefinition);
+        string sqlQueryText = "SELECT * FROM c WHERE c.SessionId = @sessionId";
+        QueryDefinition? queryDefinition =
+            new QueryDefinition(sqlQueryText).WithParameter("@sessionId", studySessionId);
+        FeedIterator<UserDocument>? queryResultSetIterator =
+            _filesContainer.GetItemQueryIterator<UserDocument>(queryDefinition);
 
-        List<UserDocument> documents = new List<UserDocument>();
+        List<UserDocument> documents = new();
 
         while (queryResultSetIterator.HasMoreResults)
         {
-            var currentResultSet = await queryResultSetIterator.ReadNextAsync();
-            foreach (var document in currentResultSet)
-            {
-                documents.Add(document);
-            }
+            FeedResponse<UserDocument>? currentResultSet = await queryResultSetIterator.ReadNextAsync();
+            foreach (UserDocument? document in currentResultSet) documents.Add(document);
         }
 
         return documents;
@@ -123,17 +115,17 @@ public class DataService : IDataService
     public async Task<(Stream File, string FileType)> GetFile(string? userId, string studySessionId, string fileId)
     {
         string containerName = "data"; // It could be a more general name or specified in the configuration
-        var blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+        BlobContainerClient? blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
 
         // Include userId in the blob's path
-        var blobClient = blobContainerClient.GetBlobClient($"{userId}/{studySessionId}/content/{fileId}");
+        BlobClient? blobClient = blobContainerClient.GetBlobClient($"{userId}/{studySessionId}/content/{fileId}");
 
-        var response = await blobClient.DownloadAsync();
-        var metadata = blobClient.GetPropertiesAsync().Result.Value.Metadata;
+        Azure.Response<BlobDownloadInfo>? response = await blobClient.DownloadAsync();
+        IDictionary<string, string>? metadata = blobClient.GetPropertiesAsync().Result.Value.Metadata;
 
         string fileType = metadata["fileType"]; // assuming you have stored file type in metadata
 
-        var memoryStream = new MemoryStream();
+        MemoryStream memoryStream = new MemoryStream();
         await response.Value.Content.CopyToAsync(memoryStream);
         memoryStream.Position = 0;
 

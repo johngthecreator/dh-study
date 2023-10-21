@@ -168,7 +168,7 @@ public class EmbeddingService
     {
         text = text.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase);
 
-        List<List<char>?> splitOptions = new List<List<char>?>
+        List<List<char>?> splitOptions = new()
         {
             new() { '\n', '\r' },
             new() { '.' },
@@ -201,7 +201,7 @@ public class EmbeddingService
     {
         text = text.Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase);
 
-        List<List<char>?> splitOptions = new List<List<char>?>
+        List<List<char>?> splitOptions = new()
         {
             new() { '.' },
             new() { '?', '!' },

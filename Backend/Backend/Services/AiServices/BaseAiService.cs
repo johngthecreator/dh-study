@@ -1,4 +1,3 @@
-using Backend.AzureBlobStorage;
 using Microsoft.SemanticKernel;
 
 namespace Backend.Services.AiServices;
@@ -12,9 +11,9 @@ public abstract class BaseAiService : IAiService
     private readonly EmbeddingCacheService _embeddingCacheService;
     private readonly IKernel _kernel;
     private readonly KernelService _kernelService;
+    private readonly TextEmbeddingService _textEmbeddingService;
     private readonly IUserAuthService _userAuthService;
     private string _getApiKey = _apiKey;
-    private readonly TextEmbeddingService _textEmbeddingService;
 
     protected BaseAiService(IConfiguration configuration,
         EmbeddingCacheService embeddingCacheService, KernelService kernelService,
@@ -30,7 +29,8 @@ public abstract class BaseAiService : IAiService
         _kernel = kernelService.KernelBuilder;
     }
 
-    public abstract Task<List<string>> Execute(string? memoryCollectionName, string userQuestion, string studySessionId);
+    public abstract Task<List<string>>
+        Execute(string? memoryCollectionName, string userQuestion, string studySessionId);
 
     /// <summary>
     ///     This is only for chataiservice right now

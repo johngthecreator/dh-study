@@ -1,7 +1,5 @@
-﻿using Backend.AzureBlobStorage;
-using Backend.Services;
+﻿using Backend.Services;
 using Backend.Services.DataService;
-
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
@@ -24,12 +22,11 @@ public class StudySessionController : Controller
     [HttpPost("makesession")]
     public async Task<IActionResult> CreateSession([FromForm] List<IFormFile> files, [FromForm] string sessionName)
     {
+        string studySessionId = await _dataService.CreateStudySession(sessionName, _userAuthService.GetUserUuid());
 
-        var studySessionId = await _dataService.CreateStudySession(sessionName, _userAuthService.GetUserUuid());
-
-        foreach (var file in files)
+        foreach (IFormFile file in files)
         {
-            using var stream = file.OpenReadStream();
+            using Stream stream = file.OpenReadStream();
 
             await _dataService.UploadFile(file.FileName, studySessionId, _userAuthService.GetUserUuid(), stream);
         }
@@ -46,7 +43,7 @@ public class StudySessionController : Controller
     [HttpPost("addfile")]
     public async Task<IActionResult> AddFile([FromForm] IFormFile formFile, string sessionId)
     {
-        using var stream = formFile.OpenReadStream();
+        using Stream stream = formFile.OpenReadStream();
 
         await _dataService.UploadFile(formFile.FileName, sessionId, _userAuthService.GetUserUuid(), stream);
 
@@ -54,8 +51,10 @@ public class StudySessionController : Controller
     }
 
     [HttpPost("getfiles")]
-    public async Task<ActionResult<IEnumerable<UserDocument>>> GetFiles(string sessionId){
-        var files = await _dataService.GetSessionDocuments(_userAuthService.GetUserUuid(), sessionId);
+    public async Task<ActionResult<IEnumerable<UserDocument>>> GetFiles(string sessionId)
+    {
+        IEnumerable<UserDocument> files =
+            await _dataService.GetSessionDocuments(_userAuthService.GetUserUuid(), sessionId);
 
         return Ok(files);
     }
