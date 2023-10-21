@@ -2,7 +2,7 @@ using Backend.AzureBlobStorage;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Memory;
 
-namespace Backend.Services;
+namespace Backend.Services.AiServices;
 
 public abstract class BaseAiService : IAiService
 {

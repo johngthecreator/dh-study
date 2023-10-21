@@ -1,16 +1,15 @@
 using Backend.AzureBlobStorage;
-using Microsoft.SemanticKernel.SkillDefinition;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SemanticFunctions;
+using Microsoft.SemanticKernel.SkillDefinition;
 
-namespace Backend.Services;
+namespace Backend.Services.AiServices;
 
-public class ChatService : BaseAiService
+public abstract class ChatService : BaseAiService
 {
-
-    public ChatService(IConfiguration configuration, UploadAzure uploadAzure, EmbeddingCacheService embeddingCacheService, 
+    protected ChatService(IConfiguration configuration, UploadAzure uploadAzure, EmbeddingCacheService embeddingCacheService, 
         UserAuthService userAuthService, KernelService kernelService) : base(configuration, uploadAzure,
         embeddingCacheService, userAuthService, kernelService)
     {

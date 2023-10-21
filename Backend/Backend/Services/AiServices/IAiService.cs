@@ -1,6 +1,4 @@
-using Microsoft.SemanticKernel;
-
-namespace Backend.Services;
+namespace Backend.Services.AiServices;
 
 public interface IAiService
 {
