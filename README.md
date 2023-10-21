@@ -1,6 +1,6 @@
 <p align="center">
 <a href=https://github.com/johngthecreator/dh-study target="_blank">
-<img src='/frontend/public/octo_logo_clear.png' width="100%" alt="Banner" />
+<img src='/frontend/public/octo_logo_clear.png' width="60%" alt="Banner" />
 </a>
 </p>
 
@@ -32,8 +32,7 @@
 
 ## 💻 Stack
 
-Include a concise explanation about the Tech Stack employed.
-
+The backend of the app is built around .NET and Azure technologies. A monolithic Azure app service is used to host the API. Files are stored in Azure blob storage. References and relations of files are stored in CosmosDB, a NoSql DB. The app service is repsonsible for managing files, autorization, interacting with the OpenAi API, and caching results to improve performance. OpenAi API is used for generating text vector embeddings and for LLM text completion opperations.
 ## 📝 Project Summary
 
 - [Backend/Backend](Backend/Backend): Core functionality and main entry point of the backend application.
@@ -51,9 +50,24 @@ Include a concise explanation about the Tech Stack employed.
 
 #### Your Environment Variable
 
-- Step 1
+- Create a `sensitivesettings.json` in the /Backend/Backend/ directory and add the following keys:
+  - OpenAiApiKey
+  - AzureBlobAccessKey1
+  - AzureBlobConnectionString1
+  - StorageAccountName
+  - BlobServiceEndpoint
 
-- Step 2
+- Install the following nuget packages:
+  - Azure.Storage.Blobs
+  - DocX
+  - itext7
+  - Microsoft.SemanticKernel
+  - Microsoft.Azure.Cosmos
+  - Swashbuckle.AspNetCore
+  - FirebaseAdmin
+  - Microsoft.AspNetCore.Authentication
+
+- Have fun running!
 
 ## 🚀 Run Locally
 1.Clone the dh-study repository:
@@ -62,11 +76,12 @@ git clone https://github.com/johngthecreator/dh-study
 ```
 2.Install the dependencies with one of the package managers listed below:
 ```sh 
-Insert INSTALL commands 
+See above
 ```
 3.Start the development mode:
 ```sh 
-Insert RUN commands 
+dotnet build
+dotnet run 
 ```
 
 ## 🙌 Contributors
