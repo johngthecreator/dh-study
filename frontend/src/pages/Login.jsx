@@ -28,15 +28,8 @@ export default function Login(){
                     const uuid = uuidDirty.split(":")[1]
                     setUuid(uuid);
                 })
-                .catch((e)=>{console.log(e)})
+                .catch((e)=>{console.error(e)})
             }
-            // if (!users.includes(uid)){
-            //     addUser(name, uid, email)
-            //     console.log("new user added")
-            // }
-            // localStorage.setItem("user",JSON.stringify({"uid":uid, "name":name, "email":email}))
-            // navigate("/listings");
-            // ...
         }).catch((error) => {
             // Handle Errors here.
             const errorCode = error.code;
@@ -51,12 +44,17 @@ export default function Login(){
     }
     return(
         <div className="flex flex-col md:flex-row overflow-hidden">
-            <div className="h-[300px] w-full lg:h-screen lg:w-1/2 flex flex-col justify-center items-center gap-5">
-                <h2 className="text-[40px] font-bold">Log into <span className="text-[#3E69A3]">PureLearn</span></h2>
-                <button className="px-3 py-2 bg-blue-300 text-2xl font-bold rounded-lg" onClick={GoogleSignIn}>Login with Google</button>
+            <div className="h-2/3 w-full lg:h-screen lg:w-1/2 flex flex-col justify-center items-start gap-5 p-20">
+                <div className="flex flex-row items-center">
+                    <div>
+                        <h2 className="text-[50px] font-bold">Meet the best AI</h2>
+                        <h2 className="text-[50px] font-bold"><span className="text-blue-600">Octo-Learning</span> Platform.</h2>
+                    </div>
+                </div>
+                <button className="p-3 w-[250px] bg-blue-600 text-2xl font-bold text-white rounded-lg" onClick={GoogleSignIn}>Sign in with Google</button>
             </div>
-            <div className="overflow-hidden h-1/2 w-full lg:h-screen lg:w-1/2">
-                <img src="https://images.unsplash.com/photo-1593698054469-2bb6fdf4b512?auto=format&fit=crop&q=80&w=1974&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" />
+            <div className="flex overflow-hidden h-1/3 w-full lg:h-screen lg:w-1/2">
+                <img src="./octo_study2.png" className="w-full" />
             </div>
 
         </div>
