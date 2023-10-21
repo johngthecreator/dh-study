@@ -32,8 +32,7 @@
 
 ## 💻 Stack
 
-Include a concise explanation about the Tech Stack employed.
-
+The backend of the app is built around .NET and Azure technologies. A monolithic Azure app service is used to host the API. Files are stored in Azure blob storage. References and relations of files are stored in CosmosDB, a NoSql DB. The app service is repsonsible for managing files, autorization, interacting with the OpenAi API, and caching results to improve performance. OpenAi API is used for generating text vector embeddings and for LLM text completion opperations.
 ## 📝 Project Summary
 
 - [Backend/Backend](Backend/Backend): Core functionality and main entry point of the backend application.
