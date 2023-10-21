@@ -26,7 +26,7 @@ public class ChatService
 
     public async Task<string> Chat(string fileName, string userQuestion)
     {
-        await LoadDocument(_kernel, fileName);
+        await RefreshMemory(_kernel, fileName);
         return await GetChatResponse(_kernel, _chatFunction, userQuestion, fileName);
     }
     
@@ -83,7 +83,7 @@ public class ChatService
         return (await chatFunction.InvokeAsync(kernelContext)).Result;
     }
     
-    private async Task LoadDocument(IKernel kernel, string fileName)
+    private async Task RefreshMemory(IKernel kernel, string fileName)
     {
         string? userUuid = _userAuthService.GetUserUuid();
 
