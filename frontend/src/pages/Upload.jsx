@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Header from '../components/Header';
 
 export default function Upload() {
     const [files, setFiles] = useState([]);
@@ -37,10 +38,11 @@ export default function Upload() {
 
     return (
         <div>
+            <Header/>
+            <div  className='flex justify-center'>
             <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="fileInput">Upload files:</label>
-                    <input
+                <div className='flex h-[175px] w-[300px] justify-center'>
+                    <input  
                         type="file"
                         id="fileInput"
                         onChange={handleFileChange}
@@ -52,9 +54,15 @@ export default function Upload() {
                     {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                 </div>
                 <div>
-                    <button type="submit">Submit</button>
+
+                </div>
+                <div className='flex gap-10 justify-center'>
+                    <button className='bg-[#F0F4F9] px-10 py-2 rounded text-[#22222] border-solid border-2 border-[#3E69A3] shrink-0 grow-0 rounded-xl'>Flashcards</button>
+                    <button className='bg-[#F0F4F9] px-10 py-2 rounded text-[#22222] border-solid border-2 border-[#3E69A3] shrink-0 grow-0 rounded-xl'>Chat</button>    
+                    <button className='bg-[#F0F4F9] px-10 py-2 rounded text-[#22222] border-solid border-2 border-[#3E69A3] shrink-0 grow-0 rounded-xl'>Quiz</button>
                 </div>
             </form>
+        </div>
         </div>
     );
 }
