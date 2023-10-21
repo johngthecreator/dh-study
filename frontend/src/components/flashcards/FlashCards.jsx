@@ -38,9 +38,9 @@ export default function FlashCards(){
     if(flashcards){
         return(
             <div className="flex flex-col items-center gap-5">
-                {Object.keys(flashcards).map(key => {
+                {Object.keys(flashcards).map(keh => {
                     return(
-                        <FlashCard front={key} back={flashcards[key]}/>
+                        <FlashCard key={`${keh}${flashcards[keh]}`} front={keh} back={flashcards[keh]}/>
                     )
                     })
                 }

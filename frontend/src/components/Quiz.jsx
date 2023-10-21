@@ -59,7 +59,7 @@ export default function Quiz(){
             <div>
                 {quiz.questions.map((resp,i)=>{
                     return(
-                        <MultipleChoice index={i} question={resp.question} choices={resp.options} answer={resp.answer}/>
+                        <MultipleChoice key={i} index={i} question={resp.question} choices={resp.options} answer={resp.answer}/>
                     )
                 })}
             </div>
