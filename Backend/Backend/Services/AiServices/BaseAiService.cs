@@ -41,9 +41,9 @@ public abstract class BaseAiService : IAiService
     protected async Task RefreshMemory(IKernel kernel, string userId, string studySessionId)
     {
         IEnumerable<Chunk> chunks = await _textEmbeddingService.GetChunks(userId, studySessionId);
-        string fileName = $"{userId}/f581f3ea-ea78-4dd0-8128-08b98bd7b0d1";
+        const string memoryCollectionName = "matthew_dev/f581f3ea-ea78-4dd0-8128-08b98bd7b0d1";
         foreach (Chunk chunk in chunks)
-            await kernel.Memory.SaveInformationAsync(fileName, chunk.Text, chunk.GetHashCode().ToString(),
+            await kernel.Memory.SaveInformationAsync(memoryCollectionName, chunk.Text, chunk.GetHashCode().ToString(),
                 chunk.SourceFile);
     }
 }

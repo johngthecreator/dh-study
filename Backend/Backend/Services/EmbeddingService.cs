@@ -3,7 +3,7 @@ using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using Xceed.Words.NET;
 
-namespace Backend;
+namespace Backend.Services;
 
 public class EmbeddingService
 {
@@ -16,7 +16,7 @@ public class EmbeddingService
         Paragraphs = SplitPlainTextParagraphs(lines, 1500);
     }
 
-    private static string? ParseFile(Stream stream, string fileName)
+    public string? ParseFile(Stream stream, string fileName)
     {
         string fileType = Path.GetExtension(fileName);
         if (fileType.Equals(".pdf", StringComparison.OrdinalIgnoreCase))

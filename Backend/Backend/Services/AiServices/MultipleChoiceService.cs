@@ -28,16 +28,16 @@ public class MultipleChoiceService : BaseAiService
         const string skPrompt = """
 Please make comprehensive and detailed multiple-choice test questions based on the most important parts of the following information. Each question should have four options, with only one being the correct answer. Format the questions in JSON, where each question includes four nested answers. Send only the JSON response; NO OTHER TEXT
 {
-  \"questions\": [
+  "questions": "answer"
         {
-            \"question\": \"...\",
-                \"options\": [
-                \"...\",
-                \"...\",
-                \"...\",
-                \"...\"
+            "question": "...,"
+                "options": [
+                "...",
+                "...",
+                "...",
+                "..."
                 ],
-                \"answer\": \"...\"
+                "answer": "..."
         },
         {...}
         ]
@@ -64,14 +64,13 @@ Please make comprehensive and detailed multiple-choice test questions based on t
         return kernel.RegisterSemanticFunction("CreateMultipleChoices", "ImportantInfoMultipleChoices", functionConfig);
     }
 
-    public override async Task<List<string>> Execute(string fileName, string userQuestion, string studySessionId)
+    public override async Task<List<string>> Execute(string fileName, string fileForContext, string studySessionId)
     {
         await RefreshMemory(_kernel, fileName, "");
-        return await GetMultipleChoiceResponse(_kernel, _multipleChoiceFunction, userQuestion);
+        return await GetMultipleChoiceResponse(_kernel, _multipleChoiceFunction, fileForContext);
     }
 
-    private static async Task<List<string>> GetMultipleChoiceResponse(IKernel kernel,
-        ISKFunction multiplechoiceFunction, string fileContext)
+    private static async Task<List<string>> GetMultipleChoiceResponse(IKernel kernel, ISKFunction multiplechoiceFunction, string fileContext)
     {
         SKContext kernelContext = kernel.CreateNewContext();
 
