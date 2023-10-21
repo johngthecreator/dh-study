@@ -40,7 +40,7 @@ export default function Header(){
             </Drawer>
             <a href='/'>
                 <div className='flex flex-row items-center'>
-                    <h1 className='text-3xl text-white font-extrabold ml-3'>PureLearn</h1>
+                    <h1 className='text-3xl text-white font-extrabold ml-3'>OctoLearn</h1>
                     <img src='./octo_logo_clear.png' className='h-[50px]'/>
                 </div>
             </a>
