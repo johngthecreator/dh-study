@@ -23,3 +23,4 @@ dist-ssr
 *.sw?
 /Backend/Backend/sensitivesettings.json
 /Backend/Backend/firebasekey.json
+/Backend/Backend/Properties/

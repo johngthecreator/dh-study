@@ -10,18 +10,29 @@ using Microsoft.AspNetCore.Authentication;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddServices();
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = "Firebase";
     options.DefaultChallengeScheme = "Firebase";
 })
-    .AddScheme<AuthenticationSchemeOptions, FirebaseAuthenticationHandler>("Firebase", null);
+.AddScheme<AuthenticationSchemeOptions, FirebaseAuthenticationHandler>("Firebase", null);
+
+// Globally enable CORS for all origins, methods, and headers
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builderCors => {
+            builderCors.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+        });
+});
 
 FirebaseApp.Create(new AppOptions
 {
@@ -41,6 +52,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Use the CORS middleware here, before UseRouting
+app.UseCors("AllowAllOrigins");
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
