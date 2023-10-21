@@ -26,7 +26,6 @@ public class FlashcardService
     private readonly KernelService _kernelService;
     private readonly TextEmbeddingService _textEmbeddingService;
     private readonly IUserAuthService _userAuthService;
-    private readonly ISKFunction _flashcardFunction;
 
     public FlashcardService(IConfiguration configuration, KernelService kernelService,
         IUserAuthService userAuthService, TextEmbeddingService textEmbeddingService)
@@ -36,7 +35,6 @@ public class FlashcardService
         _textEmbeddingService = textEmbeddingService;
         _kernel = kernelService.KernelBuilder;
         _flashcardFunction = RegisterFlashcardFunction(_kernel);
-        _destupidFunction =  CreateDestupidFunction(_kernel);
         _deDupeFunction = DeDupeFunction(_kernel);
     }
 
@@ -92,9 +90,18 @@ The following json contains term and definition flash cards. DON'T INCLUDE THING
                 Temperature = 0.4,
                 TopP = 0.1
             }
-        }
+        };
 
-    private static ISKFunction DeDupeFunction(IKernel kernel)
+
+
+        PromptTemplate promptTemplate = new(skPrompt, promptConfig, kernel);
+        SemanticFunctionConfig functionConfig = new(promptConfig, promptTemplate);
+
+        // Register the semantic function itself, params: (plugin name, function name, function config)
+        return kernel.RegisterSemanticFunction("DestupidFlashCards", "CleanFlashCards", functionConfig);
+    }
+
+        private static ISKFunction DeDupeFunction(IKernel kernel)
     {
         const string skPrompt = @"
 The following json contains term and definition flash cards. Some flash cards may be similar. Remove the similar ones. With an overview of the scope of the cards, remove ones that are too specific and not useful to the general subject matter. Things that are specific to a particular project or assignment should be removed. REUTRN ONLY JSON
@@ -117,7 +124,7 @@ The following json contains term and definition flash cards. Some flash cards ma
         SemanticFunctionConfig functionConfig = new(promptConfig, promptTemplate);
 
         // Register the semantic function itself, params: (plugin name, function name, function config)
-        return kernel.RegisterSemanticFunction("DestupidFlashCards", "CleanFlashCards", functionConfig);
+        return kernel.RegisterSemanticFunction("DedupeFlashCards", "DedupeFlashCards", functionConfig);
     }
 
     public async Task<string> Execute(string studySessionId)
