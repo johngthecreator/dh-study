@@ -133,35 +133,6 @@ The following json contains term and definition flash cards. Some flash cards ma
         return await GetFlashcards(_kernel, _flashcardFunction, _destupidFunction, paragraphs);
     }
     
-    public static bool IsValidJson(string strInput)
-    {
-        strInput = strInput.Trim();
-        if ((strInput.StartsWith("{") && strInput.EndsWith("}")) || // For an object
-            (strInput.StartsWith("[") && strInput.EndsWith("]"))) // For an array
-        {
-            try
-            {
-                JToken.Parse(strInput);
-                return true;
-            }
-            catch (JsonReaderException jex)
-            {
-                // Exception in parsing json
-                Console.WriteLine(jex.Message);
-                return false;
-            }
-            catch (Exception ex) // Some other exception
-            {
-                Console.WriteLine(ex.ToString());
-                return false;
-            }
-        }
-        else
-        {
-            return false;
-        }
-    }
-
     private async Task<List<string>> GetFlashcardString(string? userId, string studySessionId)
     {
         IEnumerable<Chunk> chunks = await _textEmbeddingService.GetChunks(userId, studySessionId);

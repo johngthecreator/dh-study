@@ -8,16 +8,17 @@ namespace Backend.Services.AiServices;
 
 public class ChatAiService
 {
-    private static TextEmbeddingService _textEmbeddingService;
+    private readonly EmbeddingCacheService _embeddingCacheService;
+    private static TextEmbeddingService? _textEmbeddingService;
     private readonly ISKFunction _chatFunction;
 
     private readonly IKernel _kernel;
     private readonly IUserAuthService _userAuthService;
 
-    public ChatAiService(IConfiguration configuration,
-        EmbeddingCacheService embeddingCacheService,
-        KernelService kernelService, TextEmbeddingService textEmbeddingService, IUserAuthService userAuthService)
+    public ChatAiService(IConfiguration configuration, EmbeddingCacheService embeddingCacheService, 
+        KernelService kernelService, TextEmbeddingService? textEmbeddingService, IUserAuthService userAuthService)
     {
+        _embeddingCacheService = embeddingCacheService;
         _textEmbeddingService = textEmbeddingService;
         _userAuthService = userAuthService;
         _kernel = kernelService.KernelBuilder;
@@ -26,7 +27,6 @@ public class ChatAiService
 
     public async Task<string> Execute(string userQuestion, string studySessionId)
     {
-        //TODO
         string? userId = _userAuthService.GetUserUuid();
         string memoryCollectionName = $"{userId}/{studySessionId}";
         await RefreshMemory(_kernel, userId, studySessionId, memoryCollectionName);
@@ -35,13 +35,19 @@ public class ChatAiService
         return responses;
     }
 
-    private static async Task RefreshMemory(IKernel kernel, string? userId, string studySessionId,
+    private async Task RefreshMemory(IKernel kernel, string? userId, string studySessionId,
         string memoryCollectionName)
     {
+        if (_embeddingCacheService.TryGetEmbeddings(userId, out ISemanticTextMemory cachedEmbeddings ))
+        {
+            kernel.RegisterMemory(cachedEmbeddings);
+            return;
+        }
         IEnumerable<Chunk> chunks = await _textEmbeddingService.GetChunks(userId, studySessionId);
         foreach (Chunk chunk in chunks)
             await kernel.Memory.SaveInformationAsync(memoryCollectionName, chunk.Text, chunk.GetHashCode().ToString(),
                 chunk.SourceFile);
+        _embeddingCacheService.SetEmbeddings(studySessionId, kernel.Memory);
     }
 
     private static ISKFunction RegisterChatFunction(IKernel kernel)
@@ -56,7 +62,7 @@ public class ChatAiService
         Use the following context to answer the question ```{{$QUESTION}}```. Answer as concise and brief as possible, 
         and remain impartial to any bias use the context rather than making up knowledge. If the context does not include 
         information that seems at least somewhat relevant, reply with 'I am sorry but there is not enough information about this in your 
-        document'
+        document'.
 
         ``` CONTEXT
         {{$CONTEXT}}
@@ -85,13 +91,12 @@ public class ChatAiService
         SKContext kernelContext = kernel.CreateNewContext();
 
         string? fileContext = null;
-        IEnumerable<Chunk> chunks =
-            await _textEmbeddingService.GetChunks("matthew_dev", "622e1e17-e1e1-4a15-8b37-a57073e12052");
-        string memoryCollection = "matthew_dev/622e1e17-e1e1-4a15-8b37-a57073e12052";
-        foreach (Chunk chunk in chunks)
-            await kernel.Memory.SaveInformationAsync(memoryCollectionName, chunk.Text, chunk.GetHashCode().ToString(),
-                chunk.SourceFile);
-        await foreach (MemoryQueryResult memory in kernel.Memory.SearchAsync(memoryCollection, userQuestion, 5, 0.5))
+        // IEnumerable<Chunk> chunks =
+        //     await _textEmbeddingService.GetChunks("matthew_dev", "622e1e17-e1e1-4a15-8b37-a57073e12052");
+        // foreach (Chunk chunk in chunks)
+        //     await kernel.Memory.SaveInformationAsync(memoryCollectionName, chunk.Text, chunk.GetHashCode().ToString(),
+        //         chunk.SourceFile);
+        await foreach (MemoryQueryResult memory in kernel.Memory.SearchAsync(memoryCollectionName, userQuestion, 5, 0.5))
             fileContext = fileContext + Environment.NewLine + memory.Metadata.Text;
 
         string history = string.Empty;

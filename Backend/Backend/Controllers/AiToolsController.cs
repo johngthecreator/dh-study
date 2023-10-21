@@ -46,7 +46,7 @@ public class AiToolsController : ControllerBase
     [Route("AiTools/createMultipleChioce")]
     public async Task<IActionResult> CreateMultipleChoice(string? studySessionId)
     {
-        List<string> responses = await _multipleChoiceService.Execute(studySessionId);
+        string responses = await _multipleChoiceService.Execute(studySessionId);
         return Ok(responses);
     }
 }

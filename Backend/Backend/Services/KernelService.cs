@@ -13,8 +13,8 @@ public class KernelService
 
         if (KernelBuilder == null)
             KernelBuilder = new KernelBuilder()
-                .WithOpenAIChatCompletionService("gpt-3.5-turbo-16k", apiKey)
-                .WithOpenAITextEmbeddingGenerationService("text-embedding-ada-002", apiKey)
+                .WithOpenAIChatCompletionService(Constants.OpenAiChatCompletionModel, apiKey)
+                .WithOpenAITextEmbeddingGenerationService(Constants.OpenAiEmbeddingModel, apiKey)
                 .WithMemoryStorage(new VolatileMemoryStore())
                 .Build();
     }

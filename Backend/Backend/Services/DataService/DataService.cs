@@ -111,11 +111,11 @@ public class DataService : IDataService
 
         return documents;
     }
+    private readonly string _containerName = "data"; // It could be a more general name or specified in the configuration
 
     public async Task<(Stream File, string FileType)> GetFile(string? userId, string studySessionId, string fileId)
     {
-        string containerName = "data"; // It could be a more general name or specified in the configuration
-        BlobContainerClient? blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+        BlobContainerClient? blobContainerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
 
         // Include userId in the blob's path
         BlobClient? blobClient = blobContainerClient.GetBlobClient($"{userId}/{studySessionId}/content/{fileId}");
@@ -130,10 +130,5 @@ public class DataService : IDataService
         memoryStream.Position = 0;
 
         return (memoryStream, fileType);
-    }
-
-    public Task<ISemanticTextMemory> GetMemory(string userId, string studySessionId)
-    {
-        throw new NotImplementedException();
     }
 }

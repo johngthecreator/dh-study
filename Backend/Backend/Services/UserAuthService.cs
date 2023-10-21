@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
-using Backend.Services;
+
+namespace Backend.Services;
 
 public class UserAuthService : IUserAuthService
 {
@@ -20,7 +21,8 @@ public class UserAuthService : IUserAuthService
         ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
 
         // If the user is not authenticated, return null
-        if (user == null || !user.Identity.IsAuthenticated) return null;
+        if (user == null || !user.Identity.IsAuthenticated) 
+            return null;
 
         // Extract the uid (UUID) from the User's claims and cache it
         _cachedUuid = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
