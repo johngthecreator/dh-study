@@ -77,11 +77,12 @@ git clone https://github.com/johngthecreator/dh-study
 ```
 2.Install the dependencies with one of the package managers listed below:
 ```sh 
-Insert INSTALL commands 
+See above
 ```
 3.Start the development mode:
 ```sh 
-Insert RUN commands 
+dotnet build
+dotnet run 
 ```
 
 ## 🙌 Contributors
