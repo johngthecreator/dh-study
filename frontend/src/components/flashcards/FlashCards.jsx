@@ -1,3 +1,4 @@
+
 import "./flashcard.css"
 function FlashCard(props){
     return(
@@ -17,6 +18,7 @@ function FlashCard(props){
 export default function FlashCards(){
     return(
         <div className="flex flex-col items-center gap-5">
+            {}
             <FlashCard front="Term" back="definition"/>
         </div>
     )

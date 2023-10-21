@@ -13,7 +13,15 @@ export default function Home(){
     // const uuid = "matthew_dev"
     useEffect(()=>{
         axios.post("https://purelearnmono.azurewebsites.net/StudySession/getsessions",{},{})
-        .then(resp=>setRecentSessions(resp.data))
+        .then(resp=>{
+            let uuidSessions = []
+            for(let i in resp.data){
+                if(resp.data[i].userId == uuid){
+                    uuidSessions.push(resp.data[i]);
+                }
+            }
+            setRecentSessions(uuidSessions);
+        })
         .catch(e=>console.error(e));
     })
     return(
@@ -31,17 +39,31 @@ export default function Home(){
             </div>
             <div className="p-5">
                 <h2 className="text-xl font-bold text-[#222]">Recent Sessions</h2>
-                <div className="flex flex-row overflow-x-scroll py-5 gap-5">
-                    {recentSessions.map((session)=>{
-                        if(session.userId == uuid){
-                            return(
-                                <Folder key={session.name} name={session.name} />
-                            )
-                        }
-                    })}
-                </div>
+                {
+                    (recentSessions.length > 0) ? (
+                        <div className="flex flex-row overflow-x-scroll py-5 gap-5">
+                            {recentSessions.map((session, index)=>{
+                                if(session.userId == uuid){
+                                    return(
+                                        <Folder key={`${session.name}${index}`} name={session.name} />
+                                    )
+                                }
+                            })}
+                        </div>
+                    ):(
+                        <div className="flex flex-col lg:flex-row items-center p-5">
+                            <div className="text-3xl font-bold">
+                                <h1>Looks like you don't have</h1>
+                                <h1>any recent sessions.</h1>
+                            </div>
+                            <img src="./octo_pose_clear.png" className="h-[300px]"/>
+
+                        </div>
+                    )
+
+                }
             </div>
-            <div className="p-5">
+            {/* <div className="p-5">
                 <h2 className="text-xl font-bold text-[#222]">Subjects</h2>
                 <div className="flex flex-row overflow-x-scroll py-5 gap-5">
                     <Folder />
@@ -57,7 +79,7 @@ export default function Home(){
                     <Folder />
                     <Folder />
                 </div>
-            </div>
+            </div> */}
             
 
 

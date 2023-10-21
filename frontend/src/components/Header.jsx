@@ -9,7 +9,8 @@ export default function Header(){
     const btnRef = useRef();
     const { isOpen, onOpen, onClose } = useDisclosure();
     return(
-        <header className="flex flex-row bg-[#3E69A3] p-5 items-center">
+        // <header className="flex flex-row bg-[#3E69A3] p-5 items-center">
+        <header className="flex flex-row bg-blue-600 p-5 items-center">
             <div className='flex flex-row gap-5 items-center'>
             <IconButton
             colorScheme="dark"
@@ -38,7 +39,10 @@ export default function Header(){
             </DrawerContent>
             </Drawer>
             <a href='/'>
-                <h1 className='text-3xl text-white font-extrabold mx-3'>PureLearn</h1>
+                <div className='flex flex-row items-center'>
+                    <h1 className='text-3xl text-white font-extrabold ml-3'>PureLearn</h1>
+                    <img src='./octo_logo_clear.png' className='h-[50px]'/>
+                </div>
             </a>
         </header>
     )
