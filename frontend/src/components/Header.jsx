@@ -10,8 +10,11 @@ import {
     IconButton
   } from '@chakra-ui/react'
 import { AddIcon, HamburgerIcon, RepeatIcon, EditIcon, ExternalLinkIcon } from "@chakra-ui/icons";
+import {useNavigate} from 'react-router-dom';
+
 
 export default function Header(){
+    const navigate = useNavigate();
     return(
         <header className="flex flex-row bg-[#3E69A3] p-5 items-center">
             <Menu>
@@ -23,8 +26,8 @@ export default function Header(){
                     className='text-white font-bold'
                 />
                 <MenuList>
-                    <MenuItem>
-                    New Tab
+                    <MenuItem onClick={()=>navigate("/upload")}>
+                        Upload
                     </MenuItem>
                     <MenuItem icon={<ExternalLinkIcon />} command='⌘N'>
                     New Window
