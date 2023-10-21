@@ -44,7 +44,7 @@ p {
 }
 
 #flip-card-back {
-  background-color: #256EFF;
+  background-color: #3E69A3;
   color: white;
   transform: rotateY(180deg);
 }

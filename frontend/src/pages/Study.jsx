@@ -10,7 +10,7 @@ export default function Study(){
                 <TabList className="self-center">
                     <Tab>Flashcards</Tab>
                     <Tab>Quizzes</Tab>
-                    <Tab>Chat w/ Notes</Tab>
+                    <Tab>Chat</Tab>
                 </TabList>
                 <TabPanels>
                     <TabPanel>
