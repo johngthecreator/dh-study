@@ -16,8 +16,9 @@ public class EmbeddingService
         Paragraphs = SplitPlainTextParagraphs(lines, 1500);
     }
 
-    private static string? ParseFile(Stream stream, string fileType)
+    private static string? ParseFile(Stream stream, string fileName)
     {
+        string fileType = Path.GetExtension(fileName);
         if (fileType.Equals(".pdf", StringComparison.OrdinalIgnoreCase))
         {
             using PdfReader reader = new(stream);
