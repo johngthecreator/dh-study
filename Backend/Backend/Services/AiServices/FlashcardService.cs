@@ -59,7 +59,6 @@ Format the flashcards in JSON, where each term is the key and the definition is 
         PromptTemplate promptTemplate = new(skPrompt, promptConfig, kernel);
         SemanticFunctionConfig functionConfig = new(promptConfig, promptTemplate);
 
-        // Register the semantic function itself, params: (plugin name, function name, function config)
         return kernel.RegisterSemanticFunction("CreateFlashcards", "ImportantInfoFlashcards", functionConfig);
     }
 
@@ -122,17 +121,17 @@ Format the flashcards in JSON, where each term is the key and the definition is 
         return chunks.Select(c => c.Text).ToList();;
     }
     
-    private static async Task<List<string>> GetFlashcards(IKernel kernel, ISKFunction flashcardsFunction, List<string> paragraphs)
+    private static async Task<List<string>> GetFlashcards(IKernel kernel, ISKFunction flashcardsFunction, List<string> contextFile)
     {
         SKContext kernelContext = kernel.CreateNewContext();
 
 
         List<string> response = new();
-        // foreach (string section in paragraphs)
-        // {
-            kernelContext.Variables["INFORMATION"] = paragraphs.FirstOrDefault();
+        foreach (string section in contextFile)
+        {
+            kernelContext.Variables["INFORMATION"] = contextFile.FirstOrDefault();
             response.Add((await flashcardsFunction.InvokeAsync(kernelContext)).Result);
-        // }
+        }
 
         return response;
     }

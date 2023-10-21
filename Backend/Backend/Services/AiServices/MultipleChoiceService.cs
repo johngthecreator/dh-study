@@ -28,24 +28,13 @@ public class MultipleChoiceService
     private static ISKFunction RegisterMultiplechoiceFunction(IKernel kernel)
     {
         const string skPrompt = """
-Please make comprehensive and detailed multiple-choice test questions based on the most important parts of the following information. Each question should have four options, with only one being the correct answer. Format the questions in JSON, where each question includes four nested answers. Send only the JSON response; NO OTHER TEXT
-{
-  "questions": "answer"
-        {
-            "question": "...,"
-                "options": [
-                "...",
-                "...",
-                "...",
-                "..."
-                ],
-                "answer": "..."
-        },
-        {...}
-        ]
-    }
+Please make comprehensive and detailed multiple-choice test questions based on the most important parts of the following information. Each question should have four options, with only one being the correct answer. Format your response in the exact same structure as below; NO OTHER TEXT
+``STRUCTURE
+{"questions":"answer"{"question": "...,""options": ["...","...","...","..."],"answer": "..."},{...}]}
+```
+
 ```INFORMATION
-{{@INFORMATION}}
+{{$INFORMATION}}
 ```
 """;
 
@@ -53,7 +42,7 @@ Please make comprehensive and detailed multiple-choice test questions based on t
         {
             Completion =
             {
-                MaxTokens = 20000,
+                MaxTokens = 5000,
                 Temperature = 0.4,
                 TopP = 0.65
             }
@@ -72,13 +61,13 @@ Please make comprehensive and detailed multiple-choice test questions based on t
         return await GetMultipleChoiceResponse(_kernel, _multipleChoiceFunction, chunks.Select(c => c.Text).ToList());
     }
 
-    private static async Task<List<string>> GetMultipleChoiceResponse(IKernel kernel, ISKFunction multiplechoiceFunction, List<string> fileContext)
+    private static async Task<List<string>> GetMultipleChoiceResponse(IKernel kernel, ISKFunction multiplechoiceFunction, List<string> contextFile)
     {
         SKContext kernelContext = kernel.CreateNewContext();
 
 
         List<string> response = new();
-        foreach (string section in fileContext)
+        foreach (string section in contextFile)
         {
             kernelContext.Variables["INFORMATION"] = section;
             response.Add((await multiplechoiceFunction.InvokeAsync(kernelContext)).Result);
