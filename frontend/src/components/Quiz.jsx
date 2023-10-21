@@ -10,7 +10,6 @@ import { uuidAtom } from '../atoms/uuidAtom';
 function MultipleChoice(props){
     const [userAnswer, setUserAnswer] = useState(null);
     const [isCorrect, setIsCorrect] = useState(null)
-    const [uuid, ] = useAtom(uuidAtom);
     useEffect(()=>{
         if(userAnswer){
             if(userAnswer == props.answer){
@@ -46,6 +45,7 @@ function MultipleChoice(props){
 export default function Quiz(){
     const [sessionId, ] = useAtom(sessionIdAtom);
     const [quiz, setQuiz] = useAtom(quizAtom);
+    const [uuid, ] = useAtom(uuidAtom);
     useEffect(()=>{
         if(sessionId && !quiz){
             axios.post(`https://purelearnmono.azurewebsites.net/AiTools/createMultipleChioce?studySessionId=${sessionId}`,{},{
