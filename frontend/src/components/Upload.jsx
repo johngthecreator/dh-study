@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Header from './Header';
 import FileDisplay from './FileDisplay';
+import UploadModal from './UploadModal';
 
 export default function Upload() {
     const [fileNames, setFileNames] = useState([]);
@@ -8,8 +9,8 @@ export default function Upload() {
     const [errorMessage, setErrorMessage] = useState('');
 
     const removeFile = (i) => {
-        fileNames.splice(i,1);
-        setFileNames(fileNames);
+        const newItems = fileNames.filter((file, idx) => idx !== i);
+        setFileNames(newItems);
     }
 
     const handleFileChange = (event) => {
@@ -26,7 +27,8 @@ export default function Upload() {
             return false;
         }
 
-        const validExtensions = ['text/plain', 'application/msword', 'application/pdf'];
+        // const validExtensions = ['text/plain', 'application/msword', 'application/pdf'];
+        const validExtensions = ['.pdf', '.docx', '.txt'];
 
         for (let i = 0; i < files.length; i++) {
             const ext = '.' + files[i].name.split('.').pop()
@@ -49,11 +51,12 @@ export default function Upload() {
     };
 
     return (
-        <div>
-            <Header/>
+        <UploadModal>
+        <div className='p-5'>
             <div  className='flex justify-center'>
-            <form onSubmit={handleSubmit}>
-                <div className='flex h-[175px] w-[300px] justify-center mt-5'>
+            <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
+                <input type='text' className='border-solid border-2 border-black p-2 rounded-lg' placeholder='Session Name'/>
+                <div className='flex justify-center'>
                     <input  
                         type="file"
                         id="fileInput"
@@ -65,19 +68,26 @@ export default function Upload() {
                 <div>
                     {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                 </div>
-                <div className="flex flex-row overflow-x-scroll py-5 gap-5">
-                    {fileNames.map((name, index) => (
-                        <FileDisplay key={index} fileName={name} func={()=>removeFile(index)} />
-                    ))}
-                </div>
+                { (fileNames.length > 0) ? (
+                    <div className="flex flex-col  overflow-y-scroll h-[200px] py-5 gap-5">
+                        {fileNames.map((name, index) => (
+                            <FileDisplay key={index} fileName={name} func={()=>removeFile(index)} />
+                        ))}
+                    </div>
+
+                ):(
+                    <div className='flex justify-center py-3'>
+                        <h2 className='font-bold text-2xl'>Upload some files!</h2>
+                    </div>
+                )
+                }
                 <div className='flex gap-10 justify-center mt-5'>
-                    <button className='bg-[#F0F4F9] px-10 py-2 rounded text-[#22222] border-solid border-2 border-[#3E69A3] shrink-0 grow-0 rounded-xl'>Flashcards</button>
-                    <button className='bg-[#F0F4F9] px-10 py-2 rounded text-[#22222] border-solid border-2 border-[#3E69A3] shrink-0 grow-0 rounded-xl'>Chat</button>    
-                    <button className='bg-[#F0F4F9] px-10 py-2 rounded text-[#22222] border-soli    d border-2 border-[#3E69A3] shrink-0 grow-0 rounded-xl'>Quiz</button>
+                    <button className='bg-[#F0F4F9] px-10 py-2 rounded text-[#22222] border-solid border-2 border-[#3E69A3] shrink-0 grow-0 rounded-xl'>Let's Study!</button>
                 </div>
             </form>
         </div>
         </div>
+    </UploadModal>
     );
 }
 

@@ -2,6 +2,8 @@ import FlashCards from "../components/flashcards/FlashCards";
 import Quiz from "../components/Quiz";
 import Header from "../components/Header";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
+import Upload from "../components/Upload";
+import Quiz from "../components/Quiz";
 
 export default function Study(){
     return(
