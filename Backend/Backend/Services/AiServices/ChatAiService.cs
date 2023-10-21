@@ -7,22 +7,32 @@ using Microsoft.SemanticKernel.SkillDefinition;
 
 namespace Backend.Services.AiServices;
 
-public abstract class ChatService : BaseAiService
+public class ChatAiService : BaseAiService
 {
-    protected ChatService(IConfiguration configuration, UploadAzure uploadAzure, EmbeddingCacheService embeddingCacheService, 
-        UserAuthService userAuthService, KernelService kernelService) : base(configuration, uploadAzure,
-        embeddingCacheService, userAuthService, kernelService)
+    private readonly ISKFunction _chatFunction;
+
+    private readonly IKernel _kernel;
+    private readonly IUserAuthService _userAuthService;
+
+    public ChatAiService(IConfiguration configuration, UploadAzure uploadAzure,
+        EmbeddingCacheService embeddingCacheService,
+        KernelService kernelService, TextEmbeddingService textEmbeddingService, IUserAuthService userAuthService) :
+        base(configuration, uploadAzure,
+            embeddingCacheService, kernelService, textEmbeddingService, userAuthService)
     {
+        _userAuthService = userAuthService;
         _kernel = kernelService.KernelBuilder;
         _chatFunction = RegisterChatFunction(_kernel);
     }
 
-    public override async Task<List<string>> Execute(string fileName, string userQuestion)
+    public override async Task<List<string>> Execute(string fileName, string userQuestion, string studySessionId)
     {
-        await RefreshMemory(_kernel, fileName);
-        return new List<string>() { await GetChatResponse(_kernel, _chatFunction, userQuestion, fileName) };
+        //TODO
+        string userId = "";
+        await RefreshMemory(_kernel, userId, studySessionId);
+        return new List<string> { await GetChatResponse(_kernel, _chatFunction, userQuestion, fileName) };
     }
-    
+
     private static ISKFunction RegisterChatFunction(IKernel kernel)
     {
         const string skPrompt = @"
@@ -40,33 +50,32 @@ public abstract class ChatService : BaseAiService
         ``` CONTEXT
         {{$CONTEXT}}
         ```";
-        
-        PromptTemplateConfig promptConfig = new PromptTemplateConfig
+
+        PromptTemplateConfig promptConfig = new()
         {
             Completion =
             {
                 MaxTokens = 2000,
                 Temperature = 0.4,
-                TopP = 0.65,
+                TopP = 0.65
             }
         };
 
-        PromptTemplate promptTemplate = new PromptTemplate(skPrompt, promptConfig, kernel);
-        SemanticFunctionConfig functionConfig = new SemanticFunctionConfig(promptConfig, promptTemplate);
+        PromptTemplate promptTemplate = new(skPrompt, promptConfig, kernel);
+        SemanticFunctionConfig functionConfig = new(promptConfig, promptTemplate);
 
         // Register the semantic function itself, params: (plugin name, function name, function config)
         return kernel.RegisterSemanticFunction("AskPdfQuestion", "AskAway", functionConfig);
     }
 
-    private static async Task<string> GetChatResponse(IKernel kernel, ISKFunction chatFunction, string userQuestion, string fileName)
+    private static async Task<string> GetChatResponse(IKernel kernel, ISKFunction chatFunction, string userQuestion,
+        string fileName)
     {
         SKContext kernelContext = kernel.CreateNewContext();
 
         string? fileContext = null;
-        await foreach(MemoryQueryResult memory in kernel.Memory.SearchAsync(fileName, userQuestion, limit: 5, minRelevanceScore: 0.5))
-        {
+        await foreach (MemoryQueryResult memory in kernel.Memory.SearchAsync(fileName, userQuestion, 5, 0.5))
             fileContext = fileContext + Environment.NewLine + memory.Metadata.Text;
-        }
 
         string history = string.Empty;
         kernelContext.Variables["history"] = history;
@@ -75,7 +84,4 @@ public abstract class ChatService : BaseAiService
 
         return (await chatFunction.InvokeAsync(kernelContext)).Result;
     }
-    
-    private readonly IKernel _kernel;
-    private readonly ISKFunction _chatFunction;
 }

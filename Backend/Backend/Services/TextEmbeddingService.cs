@@ -11,30 +11,27 @@ public class TextEmbeddingService
         _dataService = dataService;
     }
 
-    public async Task<IEnumerable<Chunck>> GetChuncks(string userId, string studySessionId)
+    public async Task<IEnumerable<Chunk>> GetChunks(string userId, string studySessionId)
     {
-        var chuncks = new List<Chunck>();
+        List<Chunk> chunks = new List<Chunk>();
 
-        var files = await _dataService.GetSessionDocuments(userId, studySessionId);
+        IEnumerable<UserDocument> files = await _dataService.GetSessionDocuments(userId, studySessionId);
 
-        foreach (var file in files)
+        foreach (UserDocument file in files)
         {
             Stream stream = null;
             try
             {
                 (stream, string ext) = await _dataService.GetFile(userId, studySessionId, file.id);
 
-                var es = new EmbeddingService(stream, ext);
+                EmbeddingService es = new EmbeddingService(stream, ext);
 
-                foreach (var chunck in es.Paragraphs)
-                {
-                    chuncks.Add(new Chunck
+                foreach (string chunk in es.Paragraphs)
+                    chunks.Add(new Chunk
                     {
-                        Text = chunck,
+                        Text = chunk,
                         SourceFile = file.FileName
                     });
-                }
-
             }
             catch (Exception ex)
             {
@@ -44,11 +41,11 @@ public class TextEmbeddingService
             }
         }
 
-        return chuncks;
+        return chunks;
     }
 }
 
-public class Chunck
+public class Chunk
 {
     public string Text { get; set; }
     public string SourceFile { get; set; }
