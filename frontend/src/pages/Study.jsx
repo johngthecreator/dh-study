@@ -5,14 +5,14 @@ import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 import Chat from "../components/Chat";
 import { useEffect } from "react";
 import { useAtom } from 'jotai';
-import { uuidAtom } from "../atoms/uuidAtom";
+import { idAtom } from "../atoms/idAtom";
 import { useNavigate } from "react-router-dom";
 
 export default function Study(){
     const navigate = useNavigate();
-    const [uuid, ] = useAtom(uuidAtom);
+    const [id, ] = useAtom(idAtom);
     useEffect(()=>{
-        if(!uuid){
+        if(!id){
             navigate("/login")
         }
     })

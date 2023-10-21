@@ -4,19 +4,19 @@ import Header from "../components/Header";
 import Upload from "../components/Upload";
 import axios from "axios";
 import { uuidAtom } from "../atoms/uuidAtom";
+import { idAtom } from "../atoms/idAtom";
 import { useAtom } from "jotai";
 import { useNavigate } from "react-router-dom";
 
 export default function Home(){
     const [recentSessions, setRecentSessions] = useState([]);
     const [uuid, ] = useAtom(uuidAtom);
+    const [id, ] = useAtom(idAtom);
     const navigate = useNavigate();
 
     useEffect(()=>{
-        if(!uuid){
+        if(!id){
             navigate("/login");
-        }else{
-            navigate("/");
         }
 
         if(uuid){
@@ -28,9 +28,7 @@ export default function Home(){
             .then(resp=>{
                 let uuidSessions = []
                 for(let i in resp.data){
-                    if(resp.data[i].userId == uuid){
-                        uuidSessions.push(resp.data[i]);
-                    }
+                    uuidSessions.push(resp.data[i]);
                 }
                 setRecentSessions(uuidSessions);
             })
@@ -56,7 +54,7 @@ export default function Home(){
                     (recentSessions.length > 0) ? (
                         <div className="flex flex-row overflow-x-scroll py-5 gap-5">
                             {recentSessions.map((session, index)=>{
-                                if(session.userId == uuid){
+                                if(session.userId == id){
                                     return(
                                         <Folder key={`${session.name}${index}`} sessionId={session.id} name={session.name} />
                                     )

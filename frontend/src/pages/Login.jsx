@@ -3,10 +3,12 @@ import { auth } from "../firebase";
 import axios from "axios";
 import { useAtom } from 'jotai';
 import { uuidAtom } from "../atoms/uuidAtom";
+import { idAtom } from "../atoms/idAtom";
 import { useNavigate } from "react-router-dom";
 
 export default function Login(){
     const [, setUuid] = useAtom(uuidAtom);
+    const [, setId] = useAtom(idAtom);
     const navigate = useNavigate();
     const GoogleSignIn = () => {
         const provider = new GoogleAuthProvider();
@@ -26,7 +28,9 @@ export default function Login(){
                     'Authorization': `Bearer ${uidToken}`
                 }})
                 .then((resp)=>{
-                    console.log(resp);
+                    const uuidDirty = resp.data.id
+                    const id = uuidDirty.split(":")[1]
+                    setId(id);
                     setUuid(uidToken);
                     navigate("/");
                 })
