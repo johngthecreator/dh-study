@@ -24,12 +24,6 @@ export default function UploadModal(props){
             <ModalBody>
             {props.children}
             </ModalBody>
-            <ModalFooter>
-            <Button colorScheme='red' mr={3} onClick={onClose}>
-                Close
-            </Button>
-            <Button colorScheme='green'>Submit</Button>
-            </ModalFooter>
         </ModalContent>
         </Modal>
     </>

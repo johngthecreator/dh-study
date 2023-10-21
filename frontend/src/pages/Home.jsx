@@ -1,5 +1,6 @@
 import Folder from "../components/Folder";
 import Header from "../components/Header";
+import Upload from "../components/Upload";
 import UploadModal from "../components/UploadModal";
 
 export default function Home(){
@@ -8,10 +9,11 @@ export default function Home(){
             <Header/>
             <div className="bg-[#BBCDE5] flex flex-col md:flex-row items-center text-[40px] font-bold gap-10 p-5">
                 <img src="./files.png" />
-                <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-5 text-[50px]">
                     <div>
-                        <p>Create a session</p>
-                        <p>to get started!</p>
+                        <h2>Create a session</h2>
+                        <h2>to get started!</h2>
+                        <Upload />
                     </div>
                 </div>
             </div>
