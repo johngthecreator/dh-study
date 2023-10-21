@@ -1,4 +1,11 @@
+import {signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { auth } from "../firebase";
+import axios from "axios";
+import { useAtom } from 'jotai';
+import { uuidAtom } from "../atoms/uuidAtom";
+
 export default function Login(){
+    const [, setUuid] = useAtom(uuidAtom);
     const GoogleSignIn = () => {
         const provider = new GoogleAuthProvider();
         signInWithPopup(auth, provider)
@@ -9,15 +16,18 @@ export default function Login(){
             // The signed-in user info.
             const user = result.user;
 
-            const uid = user.uid
-            const name = user.displayName
-            const email = user.email
+            // const uid = user.uid
+            // const name = user.displayName
             const uidToken = await user.getIdToken();
             if (token) {
-                axios.post("https://maintencemanagerdev.azurewebsites.net/test",{}, {headers:{
+                axios.post("https://purelearnmono.azurewebsites.net/test",{}, {headers:{
                     'Authorization': `Bearer ${uidToken}`
                 }})
-                .then((resp)=>{console.log(resp)})
+                .then((resp)=>{
+                    const uuidDirty = resp.data.id
+                    const uuid = uuidDirty.split(":")[1]
+                    setUuid(uuid);
+                })
                 .catch((e)=>{console.log(e)})
             }
             // if (!users.includes(uid)){
@@ -32,9 +42,10 @@ export default function Login(){
             const errorCode = error.code;
             const errorMessage = error.message;
             // The email of the user's account used.
-            const email = error.customData.email;
+            // const email = error.customData.email;
             // The AuthCredential type that was used.
             const credential = GoogleAuthProvider.credentialFromError(error);
+            console.log(errorMessage)
             // ...
         });
     }
