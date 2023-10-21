@@ -11,6 +11,7 @@ public static class ServiceCollectionExtensions2
             services
                 .AddSingleton<IDataService, DataService>()
                 .AddSingleton<TextEmbeddingService>()
+                .AddSingleton<MaterialCacheService>()
                 .AddSingleton<IUserAuthService, DevUserAuthService>();
     }
 }

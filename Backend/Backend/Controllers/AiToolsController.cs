@@ -1,3 +1,4 @@
+using Backend.Services;
 using Backend.Services.AiServices;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,16 +13,14 @@ public class QuestionModel
 public class AiToolsController : ControllerBase
 {
     private readonly ChatAiService _chatAiService;
-    private readonly FlashcardService _flashcardService;
-    private readonly MultipleChoiceService _multipleChoiceService;
+    private readonly MaterialCacheService _materialCacheService;
 
 
-    public AiToolsController(ChatAiService chatAiService, MultipleChoiceService multipleChoiceService,
-        FlashcardService flashcardService)
+    public AiToolsController(ChatAiService chatAiService,
+        MaterialCacheService materialCacheService)
     {
         _chatAiService = chatAiService;
-        _multipleChoiceService = multipleChoiceService;
-        _flashcardService = flashcardService;
+        _materialCacheService = materialCacheService;
     }
 
     [HttpPost]
@@ -38,15 +37,13 @@ public class AiToolsController : ControllerBase
     [Route("AiTools/createFlashcards")]
     public async Task<IActionResult> CreateFlashcards(string? studySessionId)
     {
-        var response = await _flashcardService.Execute(studySessionId);
-        return Ok(response);
+        return Ok(await _materialCacheService.GetFlashCards(studySessionId));
     }
 
     [HttpPost]
     [Route("AiTools/createMultipleChioce")]
     public async Task<IActionResult> CreateMultipleChoice(string? studySessionId)
     {
-        string responses = await _multipleChoiceService.Execute(studySessionId);
-        return Ok(responses);
+        return Ok(await _materialCacheService.GetQuiz(studySessionId));
     }
 }

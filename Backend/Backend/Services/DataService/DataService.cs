@@ -66,7 +66,7 @@ public class DataService : IDataService
         StudySession studySession = new StudySession
         {
             Name = studySessionName,
-            id = Guid.NewGuid().ToString(),
+            id = id,
             UserId = userId
         };
 
