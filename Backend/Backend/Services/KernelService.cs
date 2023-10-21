@@ -8,26 +8,40 @@ public class KernelService
 {
     private readonly IMemoryCache _memoryCache;
     private readonly IConfiguration _configuration;
+    private readonly TextEmbeddingService _textEmbeddingService;
 
-    public KernelService(IMemoryCache memoryCache, IConfiguration configuration)
+    public KernelService(IMemoryCache memoryCache, IConfiguration configuration, TextEmbeddingService textEmbeddingService)
     {
         _memoryCache = memoryCache;
         _configuration = configuration;
+        _textEmbeddingService = textEmbeddingService;
     }
 
-    public IKernel GetKernel(string userId)
+    public Task<IKernel> GetKernel(string userId, string studySessionId)
     {
         string apiKey = _configuration.GetConnectionString("OpenAiApiKey");
 
-        return _memoryCache.GetOrCreate($"kernel_{userId}", entry =>
+        return _memoryCache.GetOrCreateAsync($"kernel_{studySessionId}", async entry =>
         {
             entry.SetSlidingExpiration(TimeSpan.FromMinutes(10));
 
-            return new KernelBuilder()
+            var kernel = new KernelBuilder()
                 .WithOpenAIChatCompletionService("gpt-3.5-turbo-16k", apiKey)
                 .WithOpenAITextEmbeddingGenerationService("text-embedding-ada-002", apiKey)
                 .WithMemoryStorage(new VolatileMemoryStore())
                 .Build();
+
+            IEnumerable<Chunk> chunks = await _textEmbeddingService.GetChunks(userId, studySessionId);
+            foreach (Chunk chunk in chunks)
+                await kernel.Memory.SaveInformationAsync("memory", chunk.Text, chunk.GetHashCode().ToString(),
+                    chunk.SourceFile);
+
+            return kernel;
         });
+    }
+
+    public void ClearKernel(string studySessionId)
+    {
+        _memoryCache.Remove($"kernel_{studySessionId}");
     }
 }

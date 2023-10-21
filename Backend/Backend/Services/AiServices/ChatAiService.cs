@@ -84,14 +84,14 @@ public class ChatAiService
     {
         SKContext kernelContext = kernel.CreateNewContext();
 
-        string? fileContext = null;
-        IEnumerable<Chunk> chunks =
-            await _textEmbeddingService.GetChunks("matthew_dev", "622e1e17-e1e1-4a15-8b37-a57073e12052");
-        string memoryCollection = "matthew_dev/622e1e17-e1e1-4a15-8b37-a57073e12052";
-        foreach (Chunk chunk in chunks)
-            await kernel.Memory.SaveInformationAsync(memoryCollectionName, chunk.Text, chunk.GetHashCode().ToString(),
-                chunk.SourceFile);
-        await foreach (MemoryQueryResult memory in kernel.Memory.SearchAsync(memoryCollection, userQuestion, 5, 0.5))
+        //string? fileContext = null;
+        //IEnumerable<Chunk> chunks =
+        //    await _textEmbeddingService.GetChunks("matthew_dev", "622e1e17-e1e1-4a15-8b37-a57073e12052");
+        //string memoryCollection = "memory";
+        //foreach (Chunk chunk in chunks)
+        //    await kernel.Memory.SaveInformationAsync(memoryCollectionName, chunk.Text, chunk.GetHashCode().ToString(),
+        //        chunk.SourceFile);
+        await foreach (MemoryQueryResult memory in kernel.Memory.SearchAsync("memory", userQuestion, 5, 0.5))
             fileContext = fileContext + Environment.NewLine + memory.Metadata.Text;
 
         string history = string.Empty;
