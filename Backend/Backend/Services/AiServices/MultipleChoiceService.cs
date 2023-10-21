@@ -27,19 +27,19 @@ public class MultipleChoiceService
 
     private static ISKFunction RegisterMultiplechoiceFunction(IKernel kernel)
     {
-        const string skPrompt = """
+        const string skPrompt = @"
 Please make comprehensive and detailed multiple-choice test questions based on the most important parts of the following information. Each question should have four options, with only one being the correct answer. Format the questions in JSON, where each question includes four nested answers. Send only the JSON response; NO OTHER TEXT
 {
-  "questions": "answer"
+  ""questions"": ""answer""
         {
-            "question": "...,"
-                "options": [
-                "...",
-                "...",
-                "...",
-                "..."
+            ""question"": ""...,""
+                ""options"": [
+                ""..."",
+                ""..."",
+                ""..."",
+                ""...""
                 ],
-                "answer": "..."
+                ""answer"": ""...""
         },
         {...}
         ]
@@ -47,7 +47,7 @@ Please make comprehensive and detailed multiple-choice test questions based on t
 ```INFORMATION
 {{@INFORMATION}}
 ```
-""";
+";
 
         PromptTemplateConfig promptConfig = new()
         {

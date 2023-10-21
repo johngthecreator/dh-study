@@ -32,19 +32,19 @@ public class FlashcardService
 
     private static ISKFunction RegisterFlashcardFunction(IKernel kernel)
     {
-        const string skPrompt = """
+        const string skPrompt = @"
 Please make 30 comprehensive and detailed flashcards based on the most important terms to be found in the following information. Each question should have four options, with only one being the correct answer. 
 Format the flashcards in JSON, where each term is the key and the definition is the value. Make sure the return format is perfect JSON so I can parse the response directly into c# string -> json parsing; NO OTHER TEXT
 {
-  "term": "definition",
-  "term": "definition",
+  ""term"": ""definition"",
+  ""term"": ""definition"",
   ...
 }
 
 ```INFORMATION
 {{$INFORMATION}}
 ```
-""";
+";
 
         PromptTemplateConfig promptConfig = new()
         {
