@@ -1,4 +1,5 @@
 import FlashCards from "../components/flashcards/FlashCards";
+import Quiz from "../components/Quiz";
 import Header from "../components/Header";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 
@@ -17,7 +18,7 @@ export default function Study(){
                         <FlashCards />
                     </TabPanel>
                     <TabPanel>
-                    <p>two!</p>
+                        <Quiz />
                     </TabPanel>
                     <TabPanel>
                     <p>Threeee</p>
