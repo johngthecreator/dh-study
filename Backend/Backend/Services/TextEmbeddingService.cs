@@ -11,7 +11,7 @@ public class TextEmbeddingService
         _dataService = dataService;
     }
 
-    public async Task<IEnumerable<Chunk>> GetChunks(string userId, string studySessionId)
+    public async Task<IEnumerable<Chunk>> GetChunks(string? userId, string studySessionId)
     {
         List<Chunk> chunks = new List<Chunk>();
 

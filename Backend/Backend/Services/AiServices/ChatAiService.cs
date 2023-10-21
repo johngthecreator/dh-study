@@ -7,7 +7,7 @@ using Microsoft.SemanticKernel.SkillDefinition;
 
 namespace Backend.Services.AiServices;
 
-public class ChatAiService : BaseAiService
+public class ChatAiService 
 {
     private readonly ISKFunction _chatFunction;
 
@@ -17,9 +17,7 @@ public class ChatAiService : BaseAiService
 
     public ChatAiService(IConfiguration configuration,
         EmbeddingCacheService embeddingCacheService,
-        KernelService kernelService, TextEmbeddingService textEmbeddingService, IUserAuthService userAuthService) :
-        base(configuration,
-            embeddingCacheService, kernelService, textEmbeddingService, userAuthService)
+        KernelService kernelService, TextEmbeddingService textEmbeddingService, IUserAuthService userAuthService)
     {
         _textEmbeddingService = textEmbeddingService;
         _userAuthService = userAuthService;
@@ -27,12 +25,23 @@ public class ChatAiService : BaseAiService
         _chatFunction = RegisterChatFunction(_kernel);
     }
 
-    public override async Task<List<string>> Execute(string memoryCollectionName, string userQuestion, string studySessionId)
+    public async Task<string> Execute(string userQuestion, string studySessionId)
     {
         //TODO
-        string userId = _userAuthService.GetUserUuid();
-        await RefreshMemory(_kernel, userId, studySessionId);
-        return new List<string> { await GetChatResponse(_kernel, _chatFunction, userQuestion, memoryCollectionName) };
+        string? userId = _userAuthService.GetUserUuid();
+        string memoryCollectionName = $"{userId}/{studySessionId}";
+        await RefreshMemory(_kernel, userId, studySessionId, memoryCollectionName);
+        string responses = await GetChatResponse(_kernel, _chatFunction, userQuestion, memoryCollectionName);
+        
+        return responses;
+    }
+    
+    private async Task RefreshMemory(IKernel kernel, string? userId, string studySessionId, string memoryCollectionName)
+    {
+        IEnumerable<Chunk> chunks = await _textEmbeddingService.GetChunks(userId, studySessionId);
+        foreach (Chunk chunk in chunks)
+            await kernel.Memory.SaveInformationAsync(memoryCollectionName, chunk.Text, chunk.GetHashCode().ToString(),
+                chunk.SourceFile);
     }
 
     private static ISKFunction RegisterChatFunction(IKernel kernel)

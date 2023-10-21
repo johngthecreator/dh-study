@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Backend.Services.AiServices;
 
-public class FlashcardService : BaseAiService
+public class FlashcardService 
 {
     private readonly IConfiguration _configuration;
     private readonly EmbeddingCacheService _embeddingCacheService;
@@ -18,15 +18,14 @@ public class FlashcardService : BaseAiService
     private readonly IKernel _kernel;
     private readonly KernelService _kernelService;
     private readonly IUserAuthService _userAuthService;
-    private readonly IDataService _dataService;
+    private readonly TextEmbeddingService _textEmbeddingService;
 
-    public FlashcardService(IConfiguration configuration, EmbeddingCacheService embeddingCacheService, KernelService kernelService, 
-        TextEmbeddingService textEmbeddingService, IUserAuthService userAuthService, IDataService dataService) :
-        base(configuration,
-            embeddingCacheService, kernelService, textEmbeddingService, userAuthService)
+    public FlashcardService(IConfiguration configuration, KernelService kernelService,
+        IUserAuthService userAuthService, TextEmbeddingService textEmbeddingService)
     {
+        _configuration = configuration;
         _userAuthService = userAuthService;
-        _dataService = dataService;
+        _textEmbeddingService = textEmbeddingService;
         _kernel = kernelService.KernelBuilder;
         _flashcardFunction = RegisterFlashcardFunction(_kernel);
     }
@@ -65,9 +64,9 @@ Format the flashcards in JSON, where each term is the key and the definition is 
     }
 
 
-    public override async Task<List<string>> Execute(string memoryCollectionName, string fileId, string studySessionId)
+    public async Task<List<string>> Execute(string studySessionId)
     {
-        List<string>? paragraphs = await GetFlashcardString(_userAuthService.GetUserUuid(), studySessionId, fileId);
+        List<string>? paragraphs = await GetFlashcardString(_userAuthService.GetUserUuid(), studySessionId);
         List<string> results = await GetFlashcards(_kernel, _flashcardFunction, paragraphs);
 
         for (int i = 0; i < results.Count; i++)
@@ -116,16 +115,11 @@ Format the flashcards in JSON, where each term is the key and the definition is 
         }
     }
 
-    private async Task<List<string>?> GetFlashcardString(string userId, string studySessionId, string fileId)
+    private async Task<List<string>> GetFlashcardString(string? userId, string studySessionId)
     {
-        studySessionId = "622e1e17-e1e1-4a15-8b37-a57073e12052";
-        userId = "matthew_dev";
-        fileId = "eab67f93-61b4-4590-96e8-de1eea919959";
-        (Stream stream, string ext) = await _dataService.GetFile(userId, studySessionId, fileId);
+        IEnumerable<Chunk> chunks = await _textEmbeddingService.GetChunks(userId, studySessionId);
 
-        EmbeddingService es = new EmbeddingService(stream, ".txt");
-        
-        return es.Paragraphs;
+        return chunks.Select(c => c.Text).ToList();;
     }
     
     private static async Task<List<string>> GetFlashcards(IKernel kernel, ISKFunction flashcardsFunction, List<string> paragraphs)

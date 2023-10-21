@@ -100,7 +100,7 @@ public class DataService : IDataService
         return studySessions;
     }
 
-    public async Task<IEnumerable<UserDocument>> GetSessionDocuments(string userId, string studySessionId)
+    public async Task<IEnumerable<UserDocument>> GetSessionDocuments(string? userId, string studySessionId)
     {
         var sqlQueryText = $"SELECT * FROM c WHERE c.SessionId = @sessionId";
         var queryDefinition = new QueryDefinition(sqlQueryText).WithParameter("@sessionId", studySessionId);
@@ -120,7 +120,7 @@ public class DataService : IDataService
         return documents;
     }
 
-    public async Task<(Stream File, string FileType)> GetFile(string userId, string studySessionId, string fileId)
+    public async Task<(Stream File, string FileType)> GetFile(string? userId, string studySessionId, string fileId)
     {
         string containerName = "data"; // It could be a more general name or specified in the configuration
         var blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);

@@ -7,9 +7,9 @@ public interface IDataService
     public Task UploadFile(string fileName, string studySessionId, string userId, Stream fileStream);
     public Task<string> CreateStudySession(string studySessionName, string userId);
     public Task<IEnumerable<StudySession>> GetStudySessions(string userId);
-    public Task<IEnumerable<UserDocument>> GetSessionDocuments(string userId, string studySessionId);
+    public Task<IEnumerable<UserDocument>> GetSessionDocuments(string? userId, string studySessionId);
 
-    public Task<(Stream File, string FileType)> GetFile(string userId, string studySessionId, string fileId);
+    public Task<(Stream File, string FileType)> GetFile(string? userId, string studySessionId, string fileId);
 
     public Task<ISemanticTextMemory> GetMemory(string userId, string studySessionId);
 }

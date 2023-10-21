@@ -1,4 +1,5 @@
 using Backend.AzureBlobStorage;
+using Backend.Services.DataService;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SemanticFunctions;
@@ -6,18 +7,19 @@ using Microsoft.SemanticKernel.SkillDefinition;
 
 namespace Backend.Services.AiServices;
 
-public class MultipleChoiceService : BaseAiService
+public class MultipleChoiceService 
 {
     private readonly IKernel _kernel;
     private readonly ISKFunction _multipleChoiceFunction;
+    private readonly IConfiguration _configuration;
+    private readonly TextEmbeddingService _textEmbeddingService;
     private readonly IUserAuthService _userAuthService;
 
     public MultipleChoiceService(IConfiguration configuration,
-        EmbeddingCacheService embeddingCacheService,
-        KernelService kernelService, TextEmbeddingService textEmbeddingService, IUserAuthService userAuthService) :
-        base(configuration,
-            embeddingCacheService, kernelService, textEmbeddingService, userAuthService)
+        KernelService kernelService, TextEmbeddingService textEmbeddingService, IUserAuthService userAuthService)
     {
+        _configuration = configuration;
+        _textEmbeddingService = textEmbeddingService;
         _userAuthService = userAuthService;
         _kernel = kernelService.KernelBuilder;
         _multipleChoiceFunction = RegisterMultiplechoiceFunction(_kernel);
@@ -60,35 +62,28 @@ Please make comprehensive and detailed multiple-choice test questions based on t
         PromptTemplate promptTemplate = new(skPrompt, promptConfig, kernel);
         SemanticFunctionConfig functionConfig = new(promptConfig, promptTemplate);
 
-        // Register the semantic function itself, params: (plugin name, function name, function config)
         return kernel.RegisterSemanticFunction("CreateMultipleChoices", "ImportantInfoMultipleChoices", functionConfig);
     }
 
-    public override async Task<List<string>> Execute(string memoryCollectionName, string fileForContext, string studySessionId)
+    public async Task<List<string>> Execute(string studySessionId)
     {
-        await RefreshMemory(_kernel, memoryCollectionName, "");
-        return await GetMultipleChoiceResponse(_kernel, _multipleChoiceFunction, fileForContext);
+        IEnumerable<Chunk> chunks = await _textEmbeddingService.GetChunks(_userAuthService.GetUserUuid(), studySessionId);
+
+        return await GetMultipleChoiceResponse(_kernel, _multipleChoiceFunction, chunks.Select(c => c.Text).ToList());
     }
 
-    private static async Task<List<string>> GetMultipleChoiceResponse(IKernel kernel, ISKFunction multiplechoiceFunction, string fileContext)
+    private static async Task<List<string>> GetMultipleChoiceResponse(IKernel kernel, ISKFunction multiplechoiceFunction, List<string> fileContext)
     {
         SKContext kernelContext = kernel.CreateNewContext();
 
-        IEnumerable<string> paragraphs = SplitByLength(fileContext, 80000);
 
         List<string> response = new();
-        foreach (string section in paragraphs)
+        foreach (string section in fileContext)
         {
-            kernelContext.Variables["INFORMATION"] = fileContext;
+            kernelContext.Variables["INFORMATION"] = section;
             response.Add((await multiplechoiceFunction.InvokeAsync(kernelContext)).Result);
         }
 
         return response;
-    }
-
-    private static IEnumerable<string> SplitByLength(string str, int maxLength)
-    {
-        for (int index = 0; index < str.Length; index += maxLength)
-            yield return str.Substring(index, Math.Min(maxLength, str.Length - index));
     }
 }

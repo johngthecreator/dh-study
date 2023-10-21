@@ -27,18 +27,26 @@ public class AiToolsController : ControllerBase
     [Route("AiTools/chat")]
     public async Task<IActionResult> PostQuestion([FromBody] QuestionModel questionModel)
     {
-        if (string.IsNullOrEmpty(questionModel?.Question)) return BadRequest("Question cannot be empty");
-        //TODO: ADD 
-        List<string> responses = await _chatAiService.Execute("compsci", questionModel.Question, "622e1e17-e1e1-4a15-8b37-a57073e12052");
-        string response = responses[0];
+        if (string.IsNullOrEmpty(questionModel?.Question)) 
+            return BadRequest("Question cannot be empty");
+        string response = await _chatAiService.Execute(questionModel.Question, "622e1e17-e1e1-4a15-8b37-a57073e12052");
         return Ok(new { response });
     }
     
     [HttpPost]
     [Route("AiTools/createFlashcards")]
-    public async Task<IActionResult> CreateFlashcards([FromForm] string sessionToScrape)
+    public async Task<IActionResult> CreateFlashcards([FromForm] string? studySessionId)
     {
-        List<string> responses = await _flashcardService.Execute(sessionToScrape, "", "622e1e17-e1e1-4a15-8b37-a57073e12052");
+        List<string> responses = await _flashcardService.Execute("622e1e17-e1e1-4a15-8b37-a57073e12052");
+        string response = responses[0];
+        return Ok(new { response });
+    }
+    
+    [HttpPost]
+    [Route("AiTools/createMultipleChioce")]
+    public async Task<IActionResult> CreateMultipleChoice([FromForm] string? studySessionId)
+    {
+        List<string> responses = await _multipleChoiceService.Execute("622e1e17-e1e1-4a15-8b37-a57073e12052");
         string response = responses[0];
         return Ok(new { response });
     }
