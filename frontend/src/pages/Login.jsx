@@ -3,9 +3,11 @@ import { auth } from "../firebase";
 import axios from "axios";
 import { useAtom } from 'jotai';
 import { uuidAtom } from "../atoms/uuidAtom";
+import { useNavigate } from "react-router-dom";
 
 export default function Login(){
     const [, setUuid] = useAtom(uuidAtom);
+    const navigate = useNavigate();
     const GoogleSignIn = () => {
         const provider = new GoogleAuthProvider();
         signInWithPopup(auth, provider)
@@ -27,6 +29,7 @@ export default function Login(){
                     const uuidDirty = resp.data.id
                     const uuid = uuidDirty.split(":")[1]
                     setUuid(uuid);
+                    navigate("/");
                 })
                 .catch((e)=>{console.error(e)})
             }
