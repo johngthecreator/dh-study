@@ -3,30 +3,28 @@ import axios from 'axios';
 import { useAtom } from 'jotai';
 import { sessionIdAtom } from '../atoms/sessionIdAtom';
 import { convoAtom } from '../atoms/convoAtom';
+import { uuidAtom } from '../atoms/uuidAtom';
 
 export default function Chat() {
     const [messages, setMessages] = useAtom(convoAtom);
     const [sessionId,] = useAtom(sessionIdAtom);
+    const [uuid, ] = useAtom(uuidAtom)
   
     const handleSendMessage = async (text) => {
       setMessages([...messages, { sender: 'user', text }]);
-      // axios.post(`https://purelearnmono.azurewebsites.net/AiTools/chat?studySessionId=${sessionId}`,{
-      //   question:text
+      axios.post(`https://purelearnmono.azurewebsites.net/AiTools/chat?studySessionId=${sessionId}`,{
+        question:text
 
-      // },{
-      //     headers: {
-      //       'Content-Type': 'application/json'
-      //     }
-      // })
-      // .then(resp=>{
-      //   return(
-      //     <Message text={resp.data.reponse} sender={'bot'} />
-      //   )
-      // })
-
-  
-      // Here, you can add logic to send the user's message to a backend and update the state with the bot's reply.
-      // For brevity, I've omitted that part. Add it if needed.
+      },{
+          headers: {
+            'Content-Type': 'application/json'
+          }
+      })
+      .then(resp=>{
+        return(
+          <Message text={resp.data.reponse} sender={'bot'} />
+        )
+      })
   
     }
   

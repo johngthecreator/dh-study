@@ -15,7 +15,7 @@ export default function Home(){
     const navigate = useNavigate();
 
     useEffect(()=>{
-        if(!id){
+        if(!id.length > 1){
             navigate("/login");
         }
 
@@ -74,26 +74,6 @@ export default function Home(){
 
                 }
             </div>
-            {/* <div className="p-5">
-                <h2 className="text-xl font-bold text-[#222]">Subjects</h2>
-                <div className="flex flex-row overflow-x-scroll py-5 gap-5">
-                    <Folder />
-                    <Folder />
-                    <Folder />
-                    <Folder />
-                    <Folder />
-                    <Folder />
-                    <Folder />
-                    <Folder />
-                    <Folder />
-                    <Folder />
-                    <Folder />
-                    <Folder />
-                </div>
-            </div> */}
-            
-
-
         </div>
     )
 }

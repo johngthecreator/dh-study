@@ -12,7 +12,7 @@ export default function Study(){
     const navigate = useNavigate();
     const [id, ] = useAtom(idAtom);
     useEffect(()=>{
-        if(!id){
+        if(!id.length > 1){
             navigate("/login")
         }
     })
